@@ -1,0 +1,45 @@
+<!-- login.html -->
+<div id="app">
+    <form @submit.prevent="login" class="login-form">
+        <input type="text" class="form-outline mb-4" v-model="username" placeholder="用户名">
+        <input type="password" class="form-outline mb-4" v-model="password" placeholder="密码">
+        <button type="submit" class="btn btn-login" href="index.html">登录</button>
+    </form>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script>
+    const {createApp, ref} = Vue;
+    createApp({
+        setup() {
+            const username = ref('');
+            const password = ref('');
+
+            const login = async () => {
+                try {
+                    // 调用后端登录接口
+                    const response = await fetch('http://localhost:8080/api/login/', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({username: username.value, password: password.value})
+                    });
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        // 登录成功：存储令牌和用户信息
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        // 跳转到用户首页
+                        window.location.href = 'userInfo.html';
+                    } else {
+                        alert('登录失败：' + (data.error || '用户名或密码错误'));
+                    }
+                } catch (error) {
+                    alert('网络错误，请重试');
+                }
+            };
+
+            return {username, password, login};
+        }
+    }).mount('#app');
+</script>
