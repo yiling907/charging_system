@@ -28,8 +28,8 @@ def user_inform(request):
     return render(request, 'userInfo.html')
 def order_create(request):
     return render(request, 'orderCreate.html')
-def available_charger(request):
-    return render(request, 'availableCharger.html')
+def available_station(request):
+    return render(request, 'availableStation.html')
 
 class UserLoginView(ObtainAuthToken):
     def post(self, request, *args, **kwargs):

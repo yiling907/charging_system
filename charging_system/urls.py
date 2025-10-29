@@ -32,6 +32,6 @@ urlpatterns = [
     path('home/', views.index, name='home'),
     path('user_inform/', views.user_inform, name='user_inform'),
     path('order_create/', views.order_create, name='order_create'),
-    path('available_charger/', views.available_charger, name='available_charger'),
+    path('available_station/', views.available_station, name='available_station'),
 
 ]
