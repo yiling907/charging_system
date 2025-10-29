@@ -145,7 +145,7 @@
         }); // 替换为实际接口
         const data = await response.json();
         console.log(data)
-        allPorts = data.results // 筛选可用充电口
+        allPorts = data.results.filter(port=>port.status==='idle') // 筛选可用充电口
           console.log(allPorts)
       } catch (error) {
         console.error('获取充电口数据失败：', error);
@@ -214,10 +214,10 @@
 
       portListEl.innerHTML = ports.map(port => `
         <li class="port-item">
-          <div class="port-name">${port.id}</div>
+          <div class="port-name">${port.station_name}</div>
           <div class="port-address">${port.address}</div>
           <div class="port-meta">
-            类型：${port.type} | 可用数量：${port.count}
+            类型：${port.charger_type} | 更新时间：${port.updated_at}
             ${isSearchResult ? `<span class="distance">距离：${port.distance.toFixed(1)} 公里</span>` : ''}
           </div>
         </li>
