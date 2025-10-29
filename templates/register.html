@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>用户注册</title>
+    <style>
+        .form-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="form-container">
+    <h2>用户注册</h2>
+    <div class="error" id="errorMsg"></div>
+    <form id="registerForm">
+        <div class="form-group">
+            <label for="username">用户名</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="password">密码</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div class="form-group">
+            <label for="email">邮箱</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="phone">手机号（可选）</label>
+            <input type="tel" id="phone" name="phone">
+        </div>
+        <button type="submit">注册</button>
+        <p style="margin-top:15px; text-align:center;">
+            已有账号？<a href="{% url 'login' %}">去登录</a>
+        </p>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errorMsg = document.getElementById('errorMsg');
+        try {
+            // 调用注册 API（后端需实现用户创建逻辑）
+            const response = await axios.post("http://localhost:8080/api/charging/user/", {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value
+            });
+            // 注册成功跳转登录页
+            alert('注册成功！');
+            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('username', response.data.user.username)
+            window.location.href = "{% url 'login' %}";
+        } catch (err) {
+            errorMsg.textContent = err.response?.data?.message || '注册失败（用户名可能已存在）';
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,9 +1,11 @@
+from django.forms import renderers
+from django.shortcuts import render
 from rest_framework import viewsets, permissions, status, filters
 from rest_framework.decorators import action
 from rest_framework.generics import RetrieveAPIView, UpdateAPIView
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Station, Charger, ChargingRecord, Reservation
+from .models import Station, Charger, ChargingRecord, Reservation, User
 from .serializers import (
     StationSerializer, ChargerSerializer,
     ChargingRecordSerializer, ReservationSerializer
@@ -17,6 +19,17 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from .serializers import UserSerializer  # 自定义用户序列化器
 
+
+def index(request):
+    return render(request, 'index.html')
+def register(request):
+    return render(request, 'register.html')
+def user_inform(request):
+    return render(request, 'userInfo.html')
+def order_create(request):
+    return render(request, 'orderCreate.html')
+def available_charger(request):
+    return render(request, 'availableCharger.html')
 
 class UserLoginView(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
@@ -34,14 +47,26 @@ class UserLoginView(ObtainAuthToken):
             'user': UserSerializer(user).data  # 序列化用户信息（如 username、phone 等）
         })
 
-class UpdateUserView(UpdateAPIView):
-    permission_classes = (IsOperator,)
-    @action(detail=True, methods=['patch'],permission_classes=[IsOperator])
-    def update_user(self, request, pk=None):
-        user = self.get_object()
-        charger.status = 'maintenance'
-        charger.save()
-        return Response({'status': 'maintenance mode activated'})
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    lookup_field = 'username'
+
+    @action(detail=True, methods=['post'])
+    def register(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user=self.get_object()
+
+        token, created = Token.objects.get_or_create(user=user)
+
+        # 返回用户信息和令牌（仅包含普通用户可查看的字段）
+        return Response({
+            'token': token.key,
+            'user': UserSerializer(user).data  # 序列化用户信息（如 username、phone 等）
+        })
+
+
 
 
 
@@ -65,10 +90,6 @@ class ChargerViewSet(viewsets.ModelViewSet):
     filterset_fields = ['station', 'status', 'charger_type']
     search_fields = ['code', 'station__name']
 
-    def get_permissions(self):
-        if self.action in ['create', 'update', 'partial_update']:
-            return [IsOperator()]
-        return [permissions.IsAuthenticated()]
 
     @action(detail=True, methods=['post'], permission_classes=[IsMaintenanceStaff])
     def set_maintenance(self, request, pk=None):

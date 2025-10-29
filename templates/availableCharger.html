@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>充电口查询（Google Maps）</title>
+  <style>
+    /* 样式与之前保持一致 */
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .search-box {
+      margin: 20px 0;
+      display: flex;
+      gap: 10px;
+    }
+
+    #addressInput {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    #searchBtn {
+      padding: 10px 20px;
+      background: #4285F4; /* Google 蓝 */
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #searchBtn:hover {
+      background: #3367d6;
+    }
+
+    .result-title {
+      font-size: 18px;
+      margin: 20px 0 10px;
+      color: #333;
+    }
+
+    .port-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .port-item {
+      padding: 15px;
+      margin: 10px 0;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      transition: box-shadow 0.2s;
+    }
+
+    .port-item:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .port-name {
+      font-weight: bold;
+      font-size: 17px;
+      margin-bottom: 5px;
+    }
+
+    .port-address {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .port-meta {
+      font-size: 14px;
+      color: #333;
+    }
+
+    .distance {
+      color: #4285F4;
+      margin-left: 10px;
+    }
+
+    .loading {
+      color: #666;
+      padding: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- 搜索区域 -->
+  <div class="search-box">
+    <input
+      type="text"
+      id="addressInput"
+      placeholder="输入地址（如：New York, NY）搜索最近的充电口"
+    >
+    <button id="searchBtn">搜索</button>
+  </div>
+
+  <!-- 结果标题 -->
+  <div class="result-title" id="resultTitle">所有可用充电口</div>
+
+  <!-- 充电口列表容器 -->
+  <ul class="port-list" id="portList"></ul>
+
+  <!-- 引入 Google Maps 地理编码 API（需替换为你的 Key） -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9-wKqdz9VULz9XwCkMXRcJJSjTyIxvXM&libraries=places"></script>
+
+  <script>
+    // 全局变量
+    let allPorts = []; // 所有可用充电口数据
+    const portListEl = document.getElementById('portList');
+    const resultTitleEl = document.getElementById('resultTitle');
+    const addressInput = document.getElementById('addressInput');
+    const searchBtn = document.getElementById('searchBtn');
+
+    // 页面加载时初始化
+    window.onload = async () => {
+      await fetchAllPorts(); // 获取充电口数据
+      renderPorts(allPorts, false); // 渲染初始列表
+
+      // 绑定搜索事件
+      searchBtn.addEventListener('click', searchNearby);
+      addressInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') searchNearby();
+      });
+    };
+
+    /**
+     * 1. 从后端获取所有可用充电口
+     */
+    async function fetchAllPorts() {
+      try {
+        showLoading();
+        const response = await fetch('/api/charging/chargers/',{
+            headers: {
+                    'Token': localStorage.getItem('token')
+                },
+        }); // 替换为实际接口
+        const data = await response.json();
+        console.log(data)
+        allPorts = data.results // 筛选可用充电口
+          console.log(allPorts)
+      } catch (error) {
+        console.error('获取充电口数据失败：', error);
+        portListEl.innerHTML = '<li class="loading">数据加载失败，请重试</li>';
+      } finally {
+        hideLoading();
+      }
+    }
+
+    /**
+     * 2. 搜索最近的充电口（核心逻辑）
+     */
+    async function searchNearby() {
+      const address = addressInput.value.trim();
+      if (!address) {
+        alert('请输入地址');
+        return;
+      }
+
+      try {
+        showLoading();
+        // a. 调用 Google 地理编码 API 将地址转为经纬度
+        const { lat, lng } = await addressToLatLng(address);
+        if (!lat || !lng) {
+          alert('地址解析失败，请检查地址是否正确');
+          return;
+        }
+
+        // b. 计算距离并排序
+        const portsWithDistance = allPorts.map(port => ({
+          ...port,
+          distance: calculateDistance(
+            lat, lng,
+            port.latitude, port.longitude
+          )
+        }));
+
+        // c. 按距离升序排序
+        const sortedPorts = portsWithDistance
+          .filter(port => port.distance !== null)
+          .sort((a, b) => a.distance - b.distance);
+
+        // d. 渲染结果
+        renderPorts(sortedPorts, true);
+      } catch (error) {
+        console.error('搜索失败：', error);
+        portListEl.innerHTML = '<li class="loading">搜索失败，请重试</li>';
+      } finally {
+        hideLoading();
+      }
+    }
+
+    /**
+     * 3. 渲染充电口列表
+     */
+    function renderPorts(ports, isSearchResult) {
+      if (ports.length === 0) {
+        portListEl.innerHTML = '<li class="loading">暂无可用充电口</li>';
+        resultTitleEl.textContent = isSearchResult ? '未找到匹配的充电口' : '所有可用充电口';
+        return;
+      }
+
+      resultTitleEl.textContent = isSearchResult
+        ? `附近可用充电口（共 ${ports.length} 个，由近及远）`
+        : `所有可用充电口（共 ${ports.length} 个）`;
+
+      portListEl.innerHTML = ports.map(port => `
+        <li class="port-item">
+          <div class="port-name">${port.id}</div>
+          <div class="port-address">${port.address}</div>
+          <div class="port-meta">
+            类型：${port.type} | 可用数量：${port.count}
+            ${isSearchResult ? `<span class="distance">距离：${port.distance.toFixed(1)} 公里</span>` : ''}
+          </div>
+        </li>
+      `).join('');
+    }
+
+    /**
+     * 工具函数：地址转经纬度（使用 Google 地理编码 API）
+     * @param {string} address - 用户输入的地址
+     * @returns {Promise} { lat: 纬度, lng: 经度 }
+     */
+    function addressToLatLng(address) {
+      return new Promise((resolve, reject) => {
+        const geocoder = new google.maps.Geocoder(); // Google 地理编码器
+          console.log(address)
+
+        geocoder.geocode({ address: address }, (results, status) => {
+          if (status === google.maps.GeocoderStatus.OK && results.length > 0) {
+            const location = results[0].geometry.location;
+            resolve({
+              lat: location.lat(), // 纬度
+              lng: location.lng()  // 经度
+            });
+          } else {
+            reject(`地址解析失败（状态：${status}）`);
+          }
+        });
+      });
+    }
+
+    /**
+     * 工具函数：Haversine 公式计算两点距离（公里）
+     */
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // 地球半径（公里）
+      const dLat = toRadians(lat2 - lat1);
+      const dLon = toRadians(lon2 - lon1);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c; // 距离（公里）
+    }
+
+    /**
+     * 角度转弧度
+     */
+    function toRadians(degrees) {
+      return degrees * (Math.PI / 180);
+    }
+
+    /**
+     * 显示/隐藏加载状态
+     */
+    function showLoading() {
+      portListEl.innerHTML = '<li class="loading">加载中...</li>';
+    }
+
+    function hideLoading() {
+      // 加载状态会被后续渲染覆盖
+    }
+  </script>
+</body>
+</html>

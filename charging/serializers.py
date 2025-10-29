@@ -10,6 +10,9 @@ class StationSerializer(serializers.ModelSerializer):
 
 class ChargerSerializer(serializers.ModelSerializer):
     station_name = serializers.ReadOnlyField(source='station.name')
+    address = serializers.ReadOnlyField(source='station.address')
+    latitude = serializers.ReadOnlyField(source='station.latitude')
+    longitude = serializers.ReadOnlyField(source='station.longitude')
 
     class Meta:
         model = Charger
@@ -58,3 +61,26 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
+    def validate(self, data):
+        email = data['email']
+
+
+        # Check if charger is available during requested time
+        conflicts = User.objects.filter(
+            email=email,
+        ).exists()
+
+        if conflicts:
+            raise serializers.ValidationError("email have already been registered")
+        return data
+
+    def create(self, validated_data):
+        # 从验证后的数据中提取密码
+        password = validated_data.pop('password')
+        # 创建用户对象（不含密码）
+        user = User(**validated_data)
+        # 加密密码并设置
+        user.set_password(password)
+        # 保存用户（加密后的密码会被存储）
+        user.save()
+        return user

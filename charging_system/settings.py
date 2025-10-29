@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = 'django-insecure-your-secret-key-here'  # 生产环境需更换
 
@@ -9,6 +9,39 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+LOGGING = {
+    'version': 1,  # 日志配置版本（固定为1）
+    'disable_existing_loggers': False,  # 不禁用已存在的日志器
+    'formatters': {  # 日志格式
+        'verbose': {  # 详细格式
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',  # 使用 `{}` 作为格式符
+        },
+        'simple': {  # 简单格式
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {  # 日志处理器
+        'console': {  # 输出到控制台
+            'level': 'DEBUG',  # 处理 DEBUG 及以上级别
+            'class': 'logging.StreamHandler',  # 控制台输出类
+            'formatter': 'verbose',  # 使用 verbose 格式
+        },
+    },
+    'loggers': {  # 日志器
+        'django': {  # Django 自带日志器（捕获框架内部日志）
+            'handlers': ['console'],  # 使用 console 处理器
+            'level': 'INFO',  # 记录 INFO 及以上级别
+            'propagate': True,  # 是否向上级日志器传递
+        },
+        'myapp': {  # 自定义应用日志器（替换为你的 app 名称）
+            'handlers': ['console'],
+            'level': 'DEBUG',  # 开发环境建议用 DEBUG
+            'propagate': False,  # 不向上传递（避免重复记录）
+        },
+    },
+}
 # 应用配置
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -70,7 +103,7 @@ ROOT_URLCONF = 'charging_system.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        "DIRS": [Path(BASE_DIR) / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -89,7 +122,7 @@ WSGI_APPLICATION = 'charging_system.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
     }
 }
 
@@ -105,9 +138,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # DRF 配置
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
     ],
