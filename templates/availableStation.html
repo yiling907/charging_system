@@ -138,14 +138,14 @@
     async function fetchAllPorts() {
       try {
         showLoading();
-        const response = await fetch('/api/charging/chargers/',{
+        const response = await fetch('/api/charging/stations/',{
             headers: {
                     'Token': localStorage.getItem('token')
                 },
         }); // 替换为实际接口
         const data = await response.json();
         console.log(data)
-        allPorts = data.results.filter(port=>port.status==='idle') // 筛选可用充电口
+        allPorts = data.results
           console.log(allPorts)
       } catch (error) {
         console.error('获取充电口数据失败：', error);
@@ -213,11 +213,11 @@
         : `所有可用充电口（共 ${ports.length} 个）`;
 
       portListEl.innerHTML = ports.map(port => `
-        <li class="port-item">
-          <div class="port-name">${port.station_name}</div>
+        <li class="port-item" >
+            <a href="/port_details/${port.id}" class="port-link"><div class="port-name">${port.name}</div></a>
           <div class="port-address">${port.address}</div>
           <div class="port-meta">
-            类型：${port.charger_type} | 更新时间：${port.updated_at}
+            类型：${port.chargers_type} | 更新时间：${port.updated_at} | 可用充电桩数量：${port.count}
             ${isSearchResult ? `<span class="distance">距离：${port.distance.toFixed(1)} 公里</span>` : ''}
           </div>
         </li>

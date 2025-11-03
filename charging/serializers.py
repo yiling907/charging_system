@@ -2,12 +2,6 @@ from rest_framework import serializers
 from .models import Station, Charger, ChargingRecord, Reservation, User
 
 
-class StationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Station
-        fields = '__all__'
-
-
 class ChargerSerializer(serializers.ModelSerializer):
     station_name = serializers.ReadOnlyField(source='station.name')
     address = serializers.ReadOnlyField(source='station.address')
@@ -17,6 +11,22 @@ class ChargerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Charger
         fields = '__all__'
+
+
+class StationSerializer(serializers.ModelSerializer):
+    chargers = ChargerSerializer(source='filtered_chargers',many=True, read_only=True)
+    count=serializers.SerializerMethodField()
+    chargers_type=serializers.SerializerMethodField()
+    class Meta:
+        model = Station
+        fields = '__all__'
+
+    def get_count(self, obj):
+        return len(obj.filtered_chargers)
+
+    def get_chargers_type(self, obj):
+        types = {charger.charger_type for charger in obj.filtered_chargers}
+        return list(types)
 
 
 class ChargingRecordSerializer(serializers.ModelSerializer):
@@ -61,9 +71,9 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
+
     def validate(self, data):
         email = data['email']
-
 
         # Check if charger is available during requested time
         conflicts = User.objects.filter(
