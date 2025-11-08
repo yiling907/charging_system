@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>充电站详情</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* 头部导航 */
+        .header {
+            background-color: white;
+            padding: 16px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+            padding: 4px 8px;
+        }
+
+        .page-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* 基本信息卡片 */
+        .station-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .station-name {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #1a1a1a;
+        }
+
+        .station-address {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 12px 8px;
+            background-color: #f9fafb;
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1677ff;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 0;
+            border-radius: 8px;
+            border: none;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background-color: #1677ff;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #f0f2f5;
+            color: #333;
+        }
+
+        /* 充电桩列表 */
+        .section-title {
+            font-size: 17px;
+            font-weight: 600;
+            margin: 24px 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            color: #1677ff;
+        }
+
+        .charger-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .charger-card {
+            background: white;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+
+        .charger-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .charger-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .charger-id {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-idle {
+            background-color: #e6f7ee;
+            color: #00875a;
+        }
+
+        .status-charging {
+            background-color: #fff7e6;
+            color: #d48806;
+        }
+
+        .status-fault {
+            background-color: #fee;
+            color: #e02020;
+        }
+
+        .charger-info {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .view-details {
+            margin-top: 12px;
+            color: #1677ff;
+            font-size: 14px;
+            text-align: right;
+        }
+
+        /* 设施与服务 */
+        .amenities {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .amenities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .amenity-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .amenity-icon {
+            width: 36px;
+            height: 36px;
+            background-color: #f0f2f5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1677ff;
+        }
+
+        .amenity-name {
+            font-size: 13px;
+            color: #666;
+        }
+
+        /* 地图容器 */
+        .map-container {
+            width: 100%;
+            height: 200px;
+            background-color: #e8eaed;
+            border-radius: 12px;
+            margin: 16px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .map-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 8px;
+            color: #666;
+        }
+
+        .map-placeholder i {
+            font-size: 24px;
+        }
+
+        /* 弹窗样式 */
+        .dialog-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .dialog-mask.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .dialog {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            padding: 24px;
+        }
+
+        .dialog-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .dialog-message {
+            margin-bottom: 24px;
+            text-align: center;
+            color: #666;
+        }
+
+        .dialog-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background-color: #1677ff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .charger-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- 头部导航 -->
+<div class="header">
+    <div class="container header-content">
+        <button class="back-btn" onclick="history.back()">←</button>
+        <h1 class="page-title">充电站详情</h1>
+        <div></div> <!-- 占位元素 -->
+    </div>
+</div>
+
+<div class="container">
+    <!-- 充电站基本信息 -->
+    <div class="station-card">
+        <h2 class="station-name" id="stationName">加载中...</h2>
+
+        <div class="station-address">
+            <i>📍</i>
+            <span id="stationAddress">加载中...</span>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value" id="totalChargers">0</div>
+                <div class="stat-label">总充电桩</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="availableChargers">0</div>
+                <div class="stat-label">可用充电桩</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="chargingRate">0%</div>
+                <div class="stat-label">占用率</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="openStatus">--</div>
+                <div class="stat-label">营业状态</div>
+            </div>
+        </div>
+
+        <div id="map" class="map-container">
+            <div class="map-placeholder" onclick="openMap()">
+                <i>🗺️</i>
+                <span>点击查看地图位置</span>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="navigateToStation()" id="b1">
+                <i>🧭</i> 导航前往
+            </button>
+            <button class="btn btn-secondary" onclick="showShare()">
+                <i>🔗</i> 分享站点
+            </button>
+        </div>
+    </div>
+
+    <!-- 充电桩列表 -->
+    <h3 class="section-title">
+        <i>🔌</i> 充电桩列表
+    </h3>
+    <div class="charger-list" id="chargerList">
+        <!-- 充电桩卡片将通过JS动态生成 -->
+        <div class="charger-card">
+            <div class="charger-header">
+                <span class="charger-id">加载中...</span>
+                <span class="status-badge">--</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设施与服务 -->
+    <div class="amenities">
+        <h3 class="section-title">
+            <i>🎁</i> 设施与服务
+        </h3>
+        <div class="amenities-grid" id="amenitiesGrid">
+            <!-- 设施项将通过JS动态生成 -->
+        </div>
+    </div>
+</div>
+
+<!-- 弹窗 -->
+<div class="dialog-mask" id="dialogMask">
+    <div class="dialog">
+        <div class="dialog-title" id="dialogTitle"></div>
+        <div class="dialog-message" id="dialogMessage"></div>
+        <button class="dialog-btn" onclick="hideDialog()">确定</button>
+    </div>
+</div>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9-wKqdz9VULz9XwCkMXRcJJSjTyIxvXM"
+        defer></script>
+<script>
+    // 获取URL中的站点ID
+    const getStationId = () => {
+        const params = window.location.pathname.split('/')
+        const id = params.filter(part => part).pop();
+        return id;
+    };
+
+    const stationId = getStationId();
+    if (!stationId) {
+        showDialog('错误', '未找到站点ID', () => history.back());
+    }
+
+    // DOM元素
+    const elements = {
+        stationName: document.getElementById('stationName'),
+        stationAddress: document.getElementById('stationAddress'),
+        totalChargers: document.getElementById('totalChargers'),
+        availableChargers: document.getElementById('availableChargers'),
+        chargingRate: document.getElementById('chargingRate'),
+        openStatus: document.getElementById('openStatus'),
+        chargerList: document.getElementById('chargerList'),
+        amenitiesGrid: document.getElementById('amenitiesGrid'),
+        dialogMask: document.getElementById('dialogMask'),
+        dialogTitle: document.getElementById('dialogTitle'),
+        dialogMessage: document.getElementById('dialogMessage')
+    };
+
+    // 显示弹窗
+    function showDialog(title, message) {
+        elements.dialogTitle.textContent = title;
+        elements.dialogMessage.textContent = message;
+        elements.dialogMask.classList.add('show');
+    }
+
+    // 隐藏弹窗
+    function hideDialog() {
+        elements.dialogMask.classList.remove('show');
+    }
+
+    // 格式化占用率
+    const formatRate = (available, total) => {
+        if (total === 0) return '0%';
+        const used = total - available;
+        return `${Math.round((used / total) * 100)}%`;
+    };
+
+    // 生成充电桩卡片
+    const renderChargers = (chargers) => {
+        elements.chargerList.innerHTML = '';
+
+        if (chargers.length === 0) {
+            elements.chargerList.innerHTML = '<p style="text-align:center;padding:20px;">暂无充电桩信息</p>';
+            return;
+        }
+
+        chargers.forEach(charger => {
+            const statusClass = {
+                'idle': 'status-idle',
+                'charging': 'status-charging',
+                'fault': 'status-fault'
+            }[charger.status] || 'status-fault';
+
+            const statusText = {
+                'idle': '空闲',
+                'charging': '充电中',
+                'fault': '故障'
+            }[charger.status] || '未知';
+
+            const card = document.createElement('div');
+            card.className = 'charger-card';
+            card.onclick = () => window.location.href = "/chargers/"+charger.id;
+
+            card.innerHTML = `
+                    <div class="charger-header">
+                        <span class="charger-id">充电桩 ${charger.id}</span>
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                    </div>
+                    <div class="charger-info">
+                        <span>类型: ${charger.charger_type || '未知'}</span>
+                        <span>功率: ${charger.power || '未知'}kW</span>
+                    </div>
+                    <div class="charger-info">
+                        <span>接口: ${charger.firmware_version || '未知'}</span>
+                        <span>更新: ${formatTime(charger.updated_at)}</span>
+                    </div>
+                    <div class="view-details">查看详情 →</div>
+                `;
+
+            elements.chargerList.appendChild(card);
+        });
+    };
+
+    // 生成设施列表
+    const renderAmenities = (amenities) => {
+        const amenityIcons = {
+            'restroom': '🚻',
+            'parking': '🚗',
+            'wifi': '📶',
+            'store': '🏪',
+            'restaurant': '🍽️',
+            '24h': '⏰',
+            'cash': '💴',
+            'card': '💳'
+        };
+
+        amenities.forEach(amenity => {
+            const item = document.createElement('div');
+            item.className = 'amenity-item';
+            item.innerHTML = `
+                    <div class="amenity-icon">${amenityIcons[amenity.code] || '🎁'}</div>
+                    <div class="amenity-name">${amenity.name}</div>
+                `;
+            elements.amenitiesGrid.appendChild(item);
+        });
+    };
+
+    // 时间格式化
+    function formatTime(timeStr) {
+        if (!timeStr) return '未知';
+        const date = new Date(timeStr);
+        return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    }
+
+    // 获取站点详情数据
+    const fetchStationDetail = async () => {
+        try {
+            // 替换为实际接口地址
+            const response = await fetch(`/api/charging/stations/${stationId}/?charger_status=idle`);
+            if (!response.ok) throw new Error('获取数据失败');
+
+            const station = await response.json();
+            renderStationDetail(station);
+            initMap();
+        } catch (error) {
+            showDialog('加载失败', error.message);
+            console.error(error);
+        }
+    };
+    var stationLatitude;
+    var stationLongitude;
+
+    // 渲染站点详情
+    const renderStationDetail = (station) => {
+        // 基本信息
+        elements.stationName.textContent = station.name || '未知站点';
+        elements.stationAddress.textContent = station.address || '未知地址';
+        stationLatitude = station.latitude;
+        stationLongitude = station.longitude;
+
+        // 统计数据
+        const total = station.count || 0;
+        const available = station.avaliable_count || 0;
+        elements.totalChargers.textContent = total;
+        elements.availableChargers.textContent = available;
+        elements.chargingRate.textContent = formatRate(available, total);
+        elements.openStatus.textContent = station.is_active ? '营业中' : '已关闭';
+
+        // 渲染充电桩列表
+        renderChargers(station.chargers || []);
+
+        // 渲染设施列表
+        renderAmenities(station.amenities || [
+            {code: 'restroom', name: '卫生间'},
+            {code: 'parking', name: '停车场'},
+            {code: 'wifi', name: '免费WiFi'},
+            {code: '24h', name: '24小时营业'}
+        ]);
+    };
+
+    // 事件处理函数
+    function openMap() {
+        const address = elements.stationAddress.textContent;
+        showDialog('地图位置', `站点地址: ${address}\n点击确定打开地图`);
+    }
+
+    function navigateToStation() {
+        const address = elements.stationAddress.textContent;
+        showDialog('导航提示', `即将打开地图导航至:\n${address}`);
+        calculateAndDisplayRoute(directionsService, directionsRenderer, start);
+    }
+
+    function showShare() {
+        showDialog('分享站点', '已复制站点链接到剪贴板');
+        navigator.clipboard.writeText(elements.stationAddress.textContent);
+    }
+
+    // 初始化
+    window.onload = () => {
+        fetchStationDetail();
+        // 定时刷新数据（1分钟一次）
+        setInterval(fetchStationDetail, 60000);
+    };
+    var directionsService;
+    var directionsRenderer;
+    var start;
+
+    function initMap() {
+        navigator.geolocation.getCurrentPosition((pos) => {
+            start = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+            const end = new google.maps.LatLng(stationLatitude, stationLongitude)
+
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer();
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 15,
+                center: end,
+            });
+            new google.maps.Marker({
+                position: end, // 与地图中心点一致
+                map: map, // 绑定到地图
+                title: elements.stationName, // 鼠标悬停时显示的文字
+            })
+            directionsRenderer.setMap(map);
+
+        })
+    }
+
+    function calculateAndDisplayRoute(directionsService, directionsRenderer, start) {
+        console.log(start)
+        console.log(elements.stationAddress.textContent)
+        directionsService
+            .route({
+                origin: start,
+                destination: elements.stationAddress.textContent,
+                travelMode: google.maps.TravelMode.DRIVING,
+            })
+            .then((response) => {
+                directionsRenderer.setDirections(response);
+            })
+            .catch((e) => window.alert("Directions request failed due to " + e));
+    }
+</script>
+</body>
+</html>

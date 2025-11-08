@@ -138,7 +138,7 @@
     async function fetchAllPorts() {
       try {
         showLoading();
-        const response = await fetch('/api/charging/stations/',{
+        const response = await fetch('/api/charging/stations/?charger_status=idle',{
             headers: {
                     'Token': localStorage.getItem('token')
                 },
@@ -201,24 +201,24 @@
     /**
      * 3. 渲染充电口列表
      */
-    function renderPorts(ports, isSearchResult) {
-      if (ports.length === 0) {
+    function renderPorts(stations, isSearchResult) {
+      if (stations.length === 0) {
         portListEl.innerHTML = '<li class="loading">暂无可用充电口</li>';
         resultTitleEl.textContent = isSearchResult ? '未找到匹配的充电口' : '所有可用充电口';
         return;
       }
 
       resultTitleEl.textContent = isSearchResult
-        ? `附近可用充电口（共 ${ports.length} 个，由近及远）`
-        : `所有可用充电口（共 ${ports.length} 个）`;
+        ? `附近可用充电口（共 ${stations.length} 个，由近及远）`
+        : `所有可用充电口（共 ${stations.length} 个）`;
 
-      portListEl.innerHTML = ports.map(port => `
+      portListEl.innerHTML = stations.map(station => `
         <li class="port-item" >
-            <a href="/port_details/${port.id}" class="port-link"><div class="port-name">${port.name}</div></a>
-          <div class="port-address">${port.address}</div>
+            <a href="/stations/${station.id}" class="port-link"><div class="port-name">${station.name}</div></a>
+          <div class="port-address">${station.address}</div>
           <div class="port-meta">
-            类型：${port.chargers_type} | 更新时间：${port.updated_at} | 可用充电桩数量：${port.count}
-            ${isSearchResult ? `<span class="distance">距离：${port.distance.toFixed(1)} 公里</span>` : ''}
+            类型：${station.chargers_type} | 更新时间：${station.updated_at} | 可用充电桩数量：${station.avaliable_count}
+            ${isSearchResult ? `<span class="distance">距离：${station.distance.toFixed(1)} 公里</span>` : ''}
           </div>
         </li>
       `).join('');

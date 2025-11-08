@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>充电桩详情</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #1677ff;
+        }
+
+        .status-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4eaf1 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .status-tag {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: white;
+            font-size: 16px;
+        }
+
+        .status-idle {
+            background-color: #52c41a;
+        }
+
+        .status-charging {
+            background-color: #faad14;
+        }
+
+        .status-fault {
+            background-color: #f5222d;
+        }
+
+        .status-offline {
+            background-color: #8c8c8c;
+        }
+
+        .id-tag {
+            background-color: rgba(22, 119, 255, 0.1);
+            color: #1677ff;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .basic-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .info-item i {
+            color: #1677ff;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            margin: 16px 0;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-title {
+            padding: 16px;
+            font-size: 16px;
+            font-weight: bold;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section-content {
+            padding: 16px;
+        }
+
+        .cell {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cell:last-child {
+            border-bottom: none;
+        }
+
+        .cell-label {
+            color: #666;
+        }
+
+        .cell-value {
+            text-align: right;
+        }
+
+        .link-cell {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            color: #1677ff;
+            cursor: pointer;
+        }
+
+        .link-cell:after {
+            content: "→";
+            font-size: 16px;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 16px 0;
+        }
+
+        .btn {
+            padding: 14px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: opacity 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #1677ff;
+            color: white;
+        }
+
+        .btn-primary:disabled {
+            background-color: #91bfff;
+            cursor: not-allowed;
+        }
+
+        .btn-info {
+            background-color: #f0f2f5;
+            color: #333;
+        }
+
+        .dialog-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .dialog-mask.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .dialog {
+            background: white;
+            border-radius: 12px;
+            width: 80%;
+            max-width: 400px;
+            padding: 24px;
+        }
+
+        .dialog-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .dialog-message {
+            margin-bottom: 24px;
+            text-align: center;
+            color: #666;
+        }
+
+        .dialog-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background-color: #1677ff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1001;
+        }
+
+        .toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <button class="back-btn" onclick="history.back()">← 返回</button>
+        <h1>充电桩详情</h1>
+        <div></div> <!-- 占位元素，保持标题居中 -->
+    </header>
+
+    <!-- 状态卡片 -->
+    <div class="status-card">
+        <div class="status-header">
+            <div class="status-tag" id="statusTag">加载中...</div>
+            <div class="id-tag" id="chargerId">ID: --</div>
+        </div>
+        <div class="basic-info">
+            <div class="info-item">
+                <i>🔋</i>
+                <span id="chargerType">类型: 未知</span>
+            </div>
+            <div class="info-item">
+                <i>⚡</i>
+                <span id="chargerPower">功率: 未知</span>
+            </div>
+            <div class="info-item">
+                <i>🕒</i>
+                <span id="updateTime">更新时间: 未知</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 所属站点信息 -->
+    <div class="section">
+        <div class="section-title">所属站点</div>
+        <div class="section-content">
+            <div class="link-cell" id="stationName" onclick="goToStation()">
+                加载中...
+            </div>
+            <div class="cell">
+                <span class="cell-label">站点桩数</span>
+                <span class="cell-value" id="stationChargers">--</span>
+            </div>
+            <div class="link-cell" onclick="openMap()">
+                导航到站点
+            </div>
+        </div>
+    </div>
+
+    <!-- 收费标准 -->
+    <div class="section">
+        <div class="section-title">收费标准</div>
+        <div class="section-content">
+            <div class="cell">
+                <span class="cell-label">接口类型</span>
+                <span class="cell-value" id="interfaceType">未知</span>
+            </div>
+            <div class="cell">
+                <span class="cell-label">支持车型</span>
+                <span class="cell-value" id="supportedModels">未知</span>
+            </div>
+            <div class="cell">
+                <span class="cell-label">上线时间</span>
+                <span class="cell-value" id="onlineTime">未知</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 技术参数 -->
+    <div class="section">
+        <div class="section-title">技术参数</div>
+        <div class="section-content">
+            <div class="cell">
+                <span class="cell-label">接口类型</span>
+                <span class="cell-value" id="interfaceType">未知</span>
+            </div>
+            <div class="cell">
+                <span class="cell-label">支持车型</span>
+                <span class="cell-value" id="supportedModels">未知</span>
+            </div>
+            <div class="cell">
+                <span class="cell-label">上线时间</span>
+                <span class="cell-value" id="onlineTime">未知</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="action-buttons">
+        <button class="btn btn-primary" id="reserveBtn" onclick="handleCreateOrder()">
+            充电
+        </button>
+        <button class="btn btn-info" onclick="showHistory()">
+            查看充电记录
+        </button>
+    </div>
+</div>
+
+<!-- 弹窗 -->
+<div class="dialog-mask" id="dialogMask">
+    <div class="dialog">
+        <div class="dialog-title" id="dialogTitle"></div>
+        <div class="dialog-message" id="dialogMessage"></div>
+        <button class="dialog-btn" onclick="hideDialog()">确定</button>
+    </div>
+</div>
+
+<!-- 提示框 -->
+<div class="toast" id="toast"></div>
+
+<script>
+    // 获取URL中的充电桩ID
+    const getChargerId = () => {
+        const params = window.location.pathname.split('/')
+        const id = params.filter(part => part).pop();
+        return id;
+    };
+
+    const chargerId = getChargerId();
+    if (!chargerId) {
+        showToast('未找到充电桩ID');
+        setTimeout(() => history.back(), 1500);
+    }
+
+    // 状态配置
+    const statusConfig = {
+        idle: {text: '空闲中', class: 'status-idle'},
+        charging: {text: '充电中', class: 'status-charging'},
+        fault: {text: '故障', class: 'status-fault'}
+    };
+
+    // DOM元素
+    const elements = {
+        statusTag: document.getElementById('statusTag'),
+        chargerId: document.getElementById('chargerId'),
+        chargerType: document.getElementById('chargerType'),
+        chargerPower: document.getElementById('chargerPower'),
+        updateTime: document.getElementById('updateTime'),
+        stationName: document.getElementById('stationName'),
+        stationChargers: document.getElementById('stationChargers'),
+        interfaceType: document.getElementById('interfaceType'),
+        supportedModels: document.getElementById('supportedModels'),
+        onlineTime: document.getElementById('onlineTime'),
+        reserveBtn: document.getElementById('reserveBtn'),
+        dialogMask: document.getElementById('dialogMask'),
+        dialogTitle: document.getElementById('dialogTitle'),
+        dialogMessage: document.getElementById('dialogMessage'),
+        toast: document.getElementById('toast')
+    };
+
+    // 时间格式化
+    const formatTime = (timeStr) => {
+        if (!timeStr) return '未知时间';
+        const date = new Date(timeStr);
+        return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    };
+
+    // 显示提示框
+    function showToast(message, duration = 2000) {
+        elements.toast.textContent = message;
+        elements.toast.classList.add('show');
+        setTimeout(() => {
+            elements.toast.classList.remove('show');
+        }, duration);
+    }
+
+    // 显示弹窗
+    function showDialog(title, message) {
+        elements.dialogTitle.textContent = title;
+        elements.dialogMessage.textContent = message;
+        elements.dialogMask.classList.add('show');
+    }
+
+    // 隐藏弹窗
+    function hideDialog() {
+        elements.dialogMask.classList.remove('show');
+    }
+
+    // 获取充电桩详情
+    const fetchChargerDetail = async () => {
+        try {
+            // 替换为实际接口地址
+            const response = await fetch(`/api/charging/chargers/${chargerId}/`);
+            if (!response.ok) throw new Error('获取数据失败');
+
+            const charger = await response.json();
+            renderChargerDetail(charger);
+        } catch (error) {
+            showToast('加载失败: ' + error.message);
+            console.error(error);
+        }
+    };
+    var stationId;
+    // 渲染页面数据
+    const renderChargerDetail = (charger) => {
+        // 状态渲染
+        const status = charger.status || 'unknown';
+        const statusInfo = statusConfig[status] || {text: '未知状态', class: ''};
+        elements.statusTag.textContent = statusInfo.text;
+        elements.statusTag.className = `status-tag ${statusInfo.class}`;
+
+        // 基础信息
+        elements.chargerId.textContent = `ID: ${charger.id || '--'}`;
+        elements.chargerType.textContent = `类型: ${charger.charger_type || '未知'}`;
+        elements.chargerPower.textContent = `功率: ${charger.power || '未知'} kW`;
+        elements.updateTime.textContent = `更新时间: ${formatTime(charger.updated_at)}`;
+
+        // 站点信息
+        const station = charger.station_info || {};
+        elements.stationName.textContent = station.station_name || '未知站点';
+        elements.stationChargers.textContent = `总${station.charger_count || 0}个 | 可用${station.active_charger_count || 0}个`;
+        stationId = charger.station
+        // 技术参数
+        elements.interfaceType.textContent = charger.charger_type || '未知';
+        elements.supportedModels.textContent = charger.supported_models || '全车型兼容';
+        elements.onlineTime.textContent = formatTime(charger.created_at);
+
+        // 预约按钮状态
+        elements.reserveBtn.disabled = status !== 'idle';
+        elements.reserveBtn.textContent = status === 'idle' ? '充电' : '当前已经被占用';
+    };
+
+    // 事件处理函数
+    function goToStation() {
+        console.log(stationId)
+        if (stationId) {
+            window.location.href = "/stations/" + stationId;
+        } else {
+            showToast('站点信息不存在');
+        }
+    }
+
+    function openMap() {
+        const station = document.querySelector('.link-cell').textContent;
+        showDialog('导航提示', `即将打开地图导航至: ${station}`);
+    }
+
+    async function handleCreateOrder() {
+        const selectedPackage = document.querySelector(`.package-item[data-id="${selectedPackageId}"]`);
+        try {
+            // 下单 更新charger status，创建charging history, init payment
+            const response = await axios.post('/api/charging/', {
+                package_id: selectedPackageId,
+                package_name: selectedPackage.dataset.name,
+                total_price: selectedPackage.dataset.price
+            });
+            // 下单成功：跳转订单详情页
+            alert('下单成功！');
+            window.location.href = `/orders/detail/${response.data.id}/`; // 订单详情路由
+        } catch (err) {
+            alert('下单失败：' + (err.response?.data?.message || '请重试'));
+        }
+        showDialog('预约成功', '已为您预约该充电桩，保留15分钟，请尽快前往');
+    }
+
+    function showHistory() {
+        window.location.href = `/charging-history.html?chargerId=${chargerId}`;
+    }
+
+    // 初始化
+    window.onload = () => {
+        fetchChargerDetail();
+        // 定时刷新数据（30秒一次）
+        setInterval(fetchChargerDetail, 30000);
+    };
+</script>
+</body>
+</html>

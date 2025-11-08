@@ -14,7 +14,7 @@ class ChargerStatusFilter(BaseFilterBackend):
 
         if charger_status is not None:
             try:
-                queryset = queryset.filter(chargers__status=charger_status).filter(chargers__is_active=True)
+                queryset = queryset.filter(chargers__status=charger_status)
             except ValueError:
                 pass
         return queryset

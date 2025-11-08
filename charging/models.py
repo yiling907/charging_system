@@ -87,7 +87,6 @@ class ChargingRecord(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     charger = models.ForeignKey(Charger, on_delete=models.CASCADE, related_name="records")
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="charging_sessions")
-    car_license = models.CharField("License Plate", max_length=20)
     start_time = models.DateTimeField("Start Time")
     end_time = models.DateTimeField("End Time", null=True, blank=True)
     duration = models.IntegerField("Duration (minutes)", null=True, blank=True)
@@ -104,7 +103,7 @@ class ChargingRecord(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.car_license} - {self.start_time.strftime('%Y-%m-%d')}"
+        return f"{self.user.email} - {self.start_time.strftime('%Y-%m-%d')}"
 
     class Meta:
         verbose_name = "Charging Record"
@@ -140,27 +139,3 @@ class MaintenanceRecord(models.Model):
         ordering = ['-maintenance_time']
 
 
-class Reservation(models.Model):
-    """Charger reservation system"""
-    STATUS = (
-        ('pending', 'Pending'),
-        ('confirmed', 'Confirmed'),
-        ('cancelled', 'Cancelled'),
-        ('expired', 'Expired'),
-    )
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    charger = models.ForeignKey(Charger, on_delete=models.CASCADE, related_name="reservations")
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reservations")
-    start_time = models.DateTimeField("Reservation Start")
-    end_time = models.DateTimeField("Reservation End")
-    status = models.CharField("Status", max_length=20, choices=STATUS, default='pending')
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.user.username} - {self.charger.code} - {self.start_time.strftime('%Y-%m-%d %H:%M')}"
-
-    class Meta:
-        verbose_name = "Reservation"
-        verbose_name_plural = "Reservations"
-        ordering = ['-start_time']

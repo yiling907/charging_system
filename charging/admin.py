@@ -5,7 +5,7 @@ from django.urls import reverse
 import uuid
 from .models import (
     Station, Charger, ChargingRecord,
-    MaintenanceRecord, Reservation, User
+    MaintenanceRecord, User
 )
 
 
@@ -80,9 +80,9 @@ class ChargerAdmin(admin.ModelAdmin):
 
 @admin.register(ChargingRecord)
 class ChargingRecordAdmin(admin.ModelAdmin):
-    list_display = ('id', 'charger', 'car_license', 'user', 'start_time',
+    list_display = ('id', 'charger', 'user', 'start_time',
                     'end_time', 'duration', 'electricity', 'fee', 'pay_status_badge')
-    search_fields = ('car_license', 'user__username', 'charger__code', 'transaction_id')
+    search_fields = ( 'user__username', 'charger__code', 'transaction_id')
     list_filter = ('pay_status', 'charger__station', 'start_time')
     date_hierarchy = 'start_time'
     readonly_fields = ('duration', 'created_at')
@@ -127,7 +127,6 @@ class ChargingRecordAdmin(admin.ModelAdmin):
             writer.writerow([
                 obj.id,
                 obj.charger.code,
-                obj.car_license,
                 obj.start_time,
                 obj.end_time,
                 obj.electricity,
@@ -155,39 +154,3 @@ class MaintenanceRecordAdmin(admin.ModelAdmin):
             obj.charger.last_maintenance = obj.maintenance_time.date()
             obj.charger.save()
 
-
-@admin.register(Reservation)
-class ReservationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'charger', 'start_time', 'end_time', 'status_badge', 'actions_column')
-    search_fields = ('user__username', 'charger__code')
-    list_filter = ('status', 'start_time')
-    date_hierarchy = 'start_time'
-
-    def status_badge(self, obj):
-        color_map = {
-            'pending': 'warning',
-            'confirmed': 'success',
-            'cancelled': 'danger',
-            'expired': 'secondary'
-        }
-        color = color_map.get(obj.status, 'secondary')
-        return format_html(
-            '<span class="badge bg-{}">{}</span>',
-            color, dict(Reservation.STATUS)[obj.status]
-        )
-
-    status_badge.short_description = "Status"
-
-    def actions_column(self, obj):
-        """Add quick action buttons"""
-        if obj.status == 'pending':
-            confirm_url = reverse('admin:confirm_reservation', args=[obj.id])
-            cancel_url = reverse('admin:cancel_reservation', args=[obj.id])
-            return format_html(
-                '<a href="{}" class="button small">Confirm</a> '
-                '<a href="{}" class="button small danger">Cancel</a>',
-                confirm_url, cancel_url
-            )
-        return '-'
-
-    actions_column.short_description = "Actions"

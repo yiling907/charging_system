@@ -12,10 +12,10 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .customFilter import ChargerStatusFilter
-from .models import Station, Charger, ChargingRecord, Reservation, User
+from .models import Station, Charger, ChargingRecord, User
 from .serializers import (
     StationSerializer, ChargerSerializer,
-    ChargingRecordSerializer, ReservationSerializer
+    ChargingRecordSerializer
 )
 from .permissions import IsOperator, IsMaintenanceStaff
 from payments.services import create_payment
@@ -45,6 +45,12 @@ def order_create(request):
 
 def available_station(request):
     return render(request, 'availableStation.html')
+
+def stations_detail(request,id):
+    return render(request, 'stationDetail.html')
+
+def chargers_detail(request,id):
+    return render(request, 'chargerDetail.html')
 
 
 class UserLoginView(ObtainAuthToken):
@@ -95,7 +101,7 @@ charger_status = openapi.Parameter(
 @authentication_classes([TokenAuthentication])
 class StationViewSet(viewsets.ModelViewSet):
     serializer_class = StationSerializer
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter, ChargerStatusFilter]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['name', 'address']
     ordering_fields = ['name', 'created_at']
 
@@ -184,44 +190,3 @@ class ChargingRecordViewSet(viewsets.ModelViewSet):
         payment_url = create_payment(record)
         return Response({'payment_url': payment_url})
 
-
-class ReservationViewSet(viewsets.ModelViewSet):
-    serializer_class = ReservationSerializer
-    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = ['charger', 'status']
-    ordering_fields = ['start_time']
-
-    def get_queryset(self):
-        """Users see their own reservations, operators see all"""
-        user = self.request.user
-        if user.is_operator or user.is_staff:
-            return Reservation.objects.all()
-        return Reservation.objects.filter(user=user)
-
-    @action(detail=True, methods=['post'])
-    def confirm(self, request, pk=None):
-        """Confirm a reservation"""
-        reservation = self.get_object()
-        if reservation.user != request.user and not request.user.is_operator:
-            return Response(
-                {'error': 'Not authorized'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-
-        reservation.status = 'confirmed'
-        reservation.save()
-        return Response({'status': 'reservation confirmed'})
-
-    @action(detail=True, methods=['post'])
-    def cancel(self, request, pk=None):
-        """Cancel a reservation"""
-        reservation = self.get_object()
-        if reservation.user != request.user and not request.user.is_operator:
-            return Response(
-                {'error': 'Not authorized'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-
-        reservation.status = 'cancelled'
-        reservation.save()
-        return Response({'status': 'reservation cancelled'})
