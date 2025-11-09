@@ -1,3 +1,5 @@
+import logging
+
 from django.db.models import Prefetch
 from django.forms import renderers
 from django.shortcuts import render
@@ -39,18 +41,27 @@ def user_inform(request):
     return render(request, 'userInfo.html')
 
 
-def order_create(request):
-    return render(request, 'orderCreate.html')
+def order_create(request, charger_id):
+    charger = Charger.objects.filter(id=charger_id)
+    return render(request, 'orderCreate.html', context={'charger': charger})
 
 
 def available_station(request):
     return render(request, 'availableStation.html')
 
-def stations_detail(request,id):
+
+def stations_detail(request, id):
     return render(request, 'stationDetail.html')
 
-def chargers_detail(request,id):
+
+def chargers_detail(request, id):
     return render(request, 'chargerDetail.html')
+
+def records(request):
+    return render(request, 'chargerRecord.html')
+
+def temp(request):
+    return render(request, 'temp.html')
 
 
 class UserLoginView(ObtainAuthToken):
@@ -89,6 +100,7 @@ class UserViewSet(viewsets.ModelViewSet):
             'user': UserSerializer(user).data  # 序列化用户信息（如 username、phone 等）
         })
 
+
 charger_status = openapi.Parameter(
     'charger_status',  # 参数名称，必须与您的过滤器中使用的名称一致
     openapi.IN_QUERY,  # 参数位置：查询参数
@@ -124,11 +136,11 @@ class StationViewSet(viewsets.ModelViewSet):
         else:
             # 无过滤时加载所有充电桩
             queryset = queryset.exclude(chargers__isnull=True).prefetch_related(
-            Prefetch(
-                'chargers',
-                queryset=Charger.objects.all(),  # 全部充电桩
-                to_attr='filtered_chargers'  # 同样用 filtered_chargers
-            ))
+                Prefetch(
+                    'chargers',
+                    queryset=Charger.objects.all(),  # 全部充电桩
+                    to_attr='filtered_chargers'  # 同样用 filtered_chargers
+                ))
 
         return queryset
 
@@ -146,7 +158,7 @@ class ChargerViewSet(viewsets.ModelViewSet):
     filterset_fields = ['station', 'status', 'charger_type']
     search_fields = ['code', 'station__name']
 
-    @action(detail=True, methods=['post'], permission_classes=[IsMaintenanceStaff])
+    @action(detail=True, methods=['post'])
     def set_maintenance(self, request, pk=None):
         """Set charger to maintenance mode"""
         charger = self.get_object()
@@ -154,7 +166,7 @@ class ChargerViewSet(viewsets.ModelViewSet):
         charger.save()
         return Response({'status': 'maintenance mode activated'})
 
-    @action(detail=True, methods=['post'], permission_classes=[IsMaintenanceStaff])
+    @action(detail=True, methods=['post'])
     def set_active(self, request, pk=None):
         """Set charger back to active mode"""
         charger = self.get_object()
@@ -164,17 +176,23 @@ class ChargerViewSet(viewsets.ModelViewSet):
 
 
 class ChargingRecordViewSet(viewsets.ModelViewSet):
+    queryset = ChargingRecord.objects.all()
     serializer_class = ChargingRecordSerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['charger', 'user', 'pay_status']
     ordering_fields = ['start_time', 'fee']
 
-    def get_queryset(self):
-        """Users can only see their own records, operators see all"""
-        user = self.request.user
-        if user.is_operator or user.is_staff:
-            return ChargingRecord.objects.all()
-        return ChargingRecord.objects.filter(user=user)
+
+    def perform_create(self, serializer):
+        # 从验证后的数据中获取充电器对象（已通过序列化器验证）
+        charger = serializer.validated_data['charger']
+
+        # 更新充电器状态
+        charger.status = 'charging'
+        charger.save(update_fields=['status'])  # 只更新status字段，效率更高
+
+        # 保存充电记录（可在此处添加其他关联字段，如创建者）
+        serializer.save()  # 无需返回值，DRF会自动处理后续响应
 
     @action(detail=True, methods=['post'])
     def initiate_payment(self, request, pk=None):
@@ -190,3 +208,26 @@ class ChargingRecordViewSet(viewsets.ModelViewSet):
         payment_url = create_payment(record)
         return Response({'payment_url': payment_url})
 
+    @action(detail=False, methods=['get'])
+    def export_as_csv(self, request):
+        """Export selected records as CSV"""
+        import csv
+        from django.http import HttpResponse
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="charging_records.csv"'
+        queryset = ChargingRecord.objects.all()
+
+        writer = csv.writer(response)
+        writer.writerow(
+            ['ID', 'Charger', 'License Plate', 'Start Time', 'End Time', 'Energy (kWh)', 'Fee (¥)', 'Payment Status'])
+        for obj in queryset:
+            writer.writerow([
+                obj.id,
+                obj.charger.code,
+                obj.start_time,
+                obj.end_time,
+                obj.electricity,
+                obj.fee,
+                obj.get_pay_status_display()
+            ])
+        return response

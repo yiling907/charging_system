@@ -49,7 +49,13 @@ class ChargingRecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChargingRecord
         fields = '__all__'
-        read_only_fields = ('duration', 'fee', 'transaction_id', 'pay_status')
+        read_only_fields = ('duration', 'transaction_id', 'pay_status')
+
+    def validate_charger(self, charger):
+        """验证充电器状态是否为idle"""
+        if charger.status != 'idle':
+            raise serializers.ValidationError("charger status must be idle")
+        return charger  # 验证通过，返回充电器对象
 
 
 

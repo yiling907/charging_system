@@ -573,6 +573,7 @@
             if (!response.ok) throw new Error('获取数据失败');
 
             const station = await response.json();
+            console.log(station)
             renderStationDetail(station);
             initMap();
         } catch (error) {

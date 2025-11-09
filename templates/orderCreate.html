@@ -4,77 +4,135 @@
     <meta charset="UTF-8">
     <title>创建订单</title>
     <style>
-        .order-container { max-width: 800px; margin: 50px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; }
-        .package-list { display: flex; gap: 20px; margin: 30px 0; }
-        .package-item { flex: 1; padding: 20px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; }
-        .package-item.active { border-color: #007bff; background: #f8f9fa; }
-        .package-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
-        .package-price { color: #dc3545; font-size: 20px; margin: 10px 0; }
-        .order-btn { width: 100%; padding: 12px; background: #dc3545; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; }
+        .order-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+
+        .package-list {
+            display: flex;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .package-item {
+            flex: 1;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .package-item.active {
+            border-color: #007bff;
+            background: #f8f9fa;
+        }
+
+        .package-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .package-price {
+            color: #dc3545;
+            font-size: 20px;
+            margin: 10px 0;
+        }
+
+        .order-btn {
+            width: 100%;
+            padding: 12px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <div class="order-container">
-        <h2>选择充电套餐并下单</h2>
-        <div class="package-list">
-            <!-- 套餐选项：点击选中 -->
-            <div class="package-item" data-id="1" data-name="1小时快充" data-price="10">
-                <div class="package-title">1小时快充</div>
-                <div>充电时长：1小时</div>
-                <div>适用场景：紧急补电</div>
-                <div class="package-price">¥10</div>
-            </div>
-            <div class="package-item" data-id="2" data-name="3小时慢充" data-price="20">
-                <div class="package-title">3小时慢充</div>
-                <div>充电时长：3小时</div>
-                <div>适用场景：日常充电</div>
-                <div class="package-price">¥20</div>
-            </div>
-            <div class="package-item" data-id="3" data-name="全天套餐" data-price="50">
-                <div class="package-title">全天套餐</div>
-                <div>充电时长：24小时</div>
-                <div>适用场景：长时间停放</div>
-                <div class="package-price">¥50</div>
-            </div>
+<div class="order-container" display="none">
+    <h2>选择充电套餐并下单</h2>
+    <div class="package-list">
+        <!-- 套餐选项：点击选中 -->
+        <div class="package-item" data-id="1" data-time=1 data-price="10">
+            <div class="package-title">1小时快充</div>
+            <div>充电时长：1小时</div>
+            <div>适用场景：紧急补电</div>
+            <div class="package-price">¥10</div>
         </div>
-        <button id="createOrderBtn" class="order-btn" disabled>确认下单</button>
+        <div class="package-item" data-id="2" data-time=3 data-price="20">
+            <div class="package-title">3小时慢充</div>
+            <div>充电时长：3小时</div>
+            <div>适用场景：日常充电</div>
+            <div class="package-price">¥20</div>
+        </div>
+        <div class="package-item" data-id="3" data-time=24 data-price="50">
+            <div class="package-title">全天套餐</div>
+            <div>充电时长：24小时</div>
+            <div>适用场景：长时间停放</div>
+            <div class="package-price">¥50</div>
+        </div>
     </div>
+    <button id="createOrderBtn" class="order-btn" disabled>确认下单</button>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script>
-        axios.defaults.headers.common['Authorization'] = `Token ${localStorage.getItem('token')}`;
-        let selectedPackageId = null; // 选中的套餐ID
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    const getChargerId = () => {
+        const params = window.location.pathname.split('/')
+        const id = params.filter(part => part).pop();
+        return id;
+    };
+    axios.defaults.headers.common['Authorization'] = `Token ${localStorage.getItem('token')}`;
+    let selectedPackageId = null; // 选中的套餐ID
 
-        // 监听套餐选择
-        document.querySelectorAll('.package-item').forEach(item => {
-            item.addEventListener('click', () => {
-                // 移除其他选中状态，添加当前选中
-                document.querySelectorAll('.package-item').forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-                // 记录选中的套餐信息
-                selectedPackageId = item.dataset.id;
-                // 启用下单按钮
-                document.getElementById('createOrderBtn').disabled = false;
+    // 监听套餐选择
+    document.querySelectorAll('.package-item').forEach(item => {
+        item.addEventListener('click', () => {
+            // 移除其他选中状态，添加当前选中
+            document.querySelectorAll('.package-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            // 记录选中的套餐信息
+            selectedPackageId = item.dataset.id;
+            // 启用下单按钮
+            document.getElementById('createOrderBtn').disabled = false;
+        });
+    });
+
+    function formateTime(date) {
+        return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    }
+
+    // 下单按钮：提交订单
+    document.getElementById('createOrderBtn').addEventListener('click', async () => {
+        const selectedPackage = document.querySelector(`.package-item[data-id="${selectedPackageId}"]`);
+        try {
+            // 调用下单 API（后端需创建订单模型，关联用户和套餐）
+            const now = new Date();
+            let futureDate = new Date(now); // 复制当前日期
+            futureDate.setHours(now.getHours() + selectedPackage.dataset.time);
+            console.log(getChargerId(), formateTime(now), selectedPackage.dataset.time)
+            const response = await axios.post('/api/charging/records/', {
+                start_time: formateTime(now),
+                end_time: formateTime(futureDate),
+                electricity: "220", // mock data todo: need to add some logic
+                charger: getChargerId(),
+                fee: selectedPackage.dataset.price,
+                user: localStorage.getItem('userId')
             });
-        });
-
-        // 下单按钮：提交订单
-        document.getElementById('createOrderBtn').addEventListener('click', async () => {
-            const selectedPackage = document.querySelector(`.package-item[data-id="${selectedPackageId}"]`);
-            try {
-                // 调用下单 API（后端需创建订单模型，关联用户和套餐）
-                const response = await axios.post('/api/orders/', {
-                    package_id: selectedPackageId,
-                    package_name: selectedPackage.dataset.name,
-                    total_price: selectedPackage.dataset.price
-                });
-                // 下单成功：跳转订单详情页
-                alert('下单成功！');
-                window.location.href = `/orders/detail/${response.data.id}/`; // 订单详情路由
-            } catch (err) {
-                alert('下单失败：' + (err.response?.data?.message || '请重试'));
-            }
-        });
-    </script>
+            // 下单成功：跳转订单详情页
+            alert('下单成功！');
+            window.location.href = `/orders/detail/${response.data.id}/`; // 订单详情路由
+        } catch (err) {
+            alert('下单失败：' + (err.response?.data?.message || '请重试'));
+        }
+    });
+</script>
 </body>
 </html>

@@ -79,6 +79,7 @@
             // 登录成功：存储 Token（若用 Token 认证）+ 跳转首页
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('username', response.data.user.username)
+            localStorage.setItem('userId', response.data.user.id)
             window.location.href = "{% url 'user_inform' %}"; // 首页路由
         } catch (err) {
             // 显示错误信息（如用户名密码错误）

@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>充电记录管理</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+
+  <!-- 配置Tailwind自定义颜色和字体 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            secondary: '#36CFC9',
+            success: '#52C41A',
+            warning: '#FAAD14',
+            danger: '#FF4D4F',
+            neutral: {
+              100: '#F5F5F5',
+              200: '#E5E5E5',
+              300: '#D4D4D4',
+              400: '#A3A3A3',
+              500: '#737373',
+              600: '#525252',
+              700: '#404040',
+              800: '#262626',
+              900: '#171717',
+            }
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+      .card-shadow {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      }
+      .hover-lift {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .hover-lift:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      }
+    }
+  </style>
+</head>
+
+<body class="font-inter bg-neutral-100 text-neutral-800 min-h-screen">
+  <!-- 顶部导航栏 -->
+  <header class="bg-white shadow-sm fixed top-0 left-0 right-0 z-50 transition-all duration-300" id="navbar">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center">
+          <i class="fa fa-bolt text-primary text-2xl mr-2"></i>
+          <h1 class="text-xl font-semibold text-neutral-800">充电记录管理系统</h1>
+        </div>
+
+        <div class="flex items-center space-x-4">
+          <button class="p-2 rounded-full hover:bg-neutral-100 transition-colors relative">
+            <i class="fa fa-bell-o text-neutral-600"></i>
+            <span class="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full"></span>
+          </button>
+
+          <div class="flex items-center space-x-2">
+            <img src="https://picsum.photos/id/64/40/40" alt="用户头像" class="w-8 h-8 rounded-full object-cover">
+            <span class="hidden md:inline-block text-sm font-medium">管理员</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主内容区 -->
+  <main class="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+    <!-- 页面标题和操作区 -->
+    <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between">
+      <div>
+        <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-neutral-800">充电记录</h2>
+        <p class="text-neutral-500 mt-1">查看和管理所有充电记录信息</p>
+      </div>
+
+      <div class="mt-4 md:mt-0 flex space-x-3">
+        <button id="exportBtn" class="inline-flex items-center px-4 py-2 bg-white border border-neutral-300 rounded-lg text-neutral-700 text-sm font-medium hover:bg-neutral-50 transition-colors">
+          <i class="fa fa-download mr-2"></i>导出数据
+        </button>
+        <button id="refreshBtn" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
+          <i class="fa fa-refresh mr-2"></i>刷新记录
+        </button>
+      </div>
+    </div>
+
+    <!-- 统计卡片 -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div class="bg-white rounded-xl p-6 card-shadow hover-lift">
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-neutral-500 text-sm">本月充电次数</p>
+            <h3 class="text-3xl font-bold mt-2 text-neutral-800" id="monthlyCount">0</h3>
+            <p class="text-success text-sm mt-2 flex items-center">
+              <i class="fa fa-arrow-up mr-1"></i>
+              <span>12.5%</span>
+              <span class="text-neutral-500 ml-1">较上月</span>
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+            <i class="fa fa-plug text-primary text-xl"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-6 card-shadow hover-lift">
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-neutral-500 text-sm">本月充电总量</p>
+            <h3 class="text-3xl font-bold mt-2 text-neutral-800" id="monthlyTotal">0 kWh</h3>
+            <p class="text-success text-sm mt-2 flex items-center">
+              <i class="fa fa-arrow-up mr-1"></i>
+              <span>8.3%</span>
+              <span class="text-neutral-500 ml-1">较上月</span>
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
+            <i class="fa fa-battery-three-quarters text-secondary text-xl"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-6 card-shadow hover-lift">
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-neutral-500 text-sm">本月充电费用</p>
+            <h3 class="text-3xl font-bold mt-2 text-neutral-800" id="monthlyCost">¥0</h3>
+            <p class="text-danger text-sm mt-2 flex items-center">
+              <i class="fa fa-arrow-up mr-1"></i>
+              <span>5.2%</span>
+              <span class="text-neutral-500 ml-1">较上月</span>
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-full bg-warning/10 flex items-center justify-center">
+            <i class="fa fa-money text-warning text-xl"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-6 card-shadow hover-lift">
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-neutral-500 text-sm">平均充电时长</p>
+            <h3 class="text-3xl font-bold mt-2 text-neutral-800" id="avgDuration">0 小时</h3>
+            <p class="text-success text-sm mt-2 flex items-center">
+              <i class="fa fa-arrow-down mr-1"></i>
+              <span>3.1%</span>
+              <span class="text-neutral-500 ml-1">较上月</span>
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center">
+            <i class="fa fa-clock-o text-success text-xl"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 图表区域 -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white rounded-xl p-6 card-shadow lg:col-span-2">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="font-semibold text-lg">充电趋势 (近7天)</h3>
+          <div class="flex space-x-2">
+            <button class="chart-period-btn px-3 py-1 text-sm rounded-md bg-primary text-white">日</button>
+            <button class="chart-period-btn px-3 py-1 text-sm rounded-md bg-neutral-100 text-neutral-600 hover:bg-neutral-200">周</button>
+            <button class="chart-period-btn px-3 py-1 text-sm rounded-md bg-neutral-100 text-neutral-600 hover:bg-neutral-200">月</button>
+          </div>
+        </div>
+        <div class="h-80">
+          <canvas id="chargingTrendChart"></canvas>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-6 card-shadow">
+        <h3 class="font-semibold text-lg mb-6">充电类型分布</h3>
+        <div class="h-80 flex items-center justify-center">
+          <canvas id="chargingTypeChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- 筛选和搜索区 -->
+    <div class="bg-white rounded-xl p-6 card-shadow mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-neutral-700 mb-1">设备编号</label>
+          <select id="deviceSelect" class="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all">
+            <option value="">全部设备</option>
+            <option value="DEV001">DEV001</option>
+            <option value="DEV002">DEV002</option>
+            <option value="DEV003">DEV003</option>
+            <option value="DEV004">DEV004</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-neutral-700 mb-1">充电状态</label>
+          <select id="statusSelect" class="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all">
+            <option value="">全部状态</option>
+            <option value="completed">已完成</option>
+            <option value="charging">充电中</option>
+            <option value="failed">已失败</option>
+            <option value="cancelled">已取消</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-neutral-700 mb-1">日期范围</label>
+          <input type="date" id="dateFilter" class="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-neutral-700 mb-1">搜索</label>
+          <div class="relative">
+            <input type="text" id="searchInput" placeholder="搜索记录..." class="w-full pl-10 pr-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all">
+            <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 flex justify-end space-x-3">
+        <button id="resetFilter" class="px-4 py-2 border border-neutral-300 rounded-lg text-neutral-700 text-sm font-medium hover:bg-neutral-50 transition-colors">
+          重置
+        </button>
+        <button id="applyFilter" class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
+          应用筛选
+        </button>
+      </div>
+    </div>
+
+    <!-- 记录表格 -->
+    <div class="bg-white rounded-xl card-shadow overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-neutral-200">
+          <thead class="bg-neutral-50">
+            <tr>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                记录ID
+              </th>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                设备编号
+              </th>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                开始时间
+              </th>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                结束时间
+              </th>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                充电量(kWh)
+              </th>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                费用(¥)
+              </th>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                充电类型
+              </th>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                状态
+              </th>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                操作
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-neutral-200" id="recordsTableBody">
+            <!-- 表格内容将通过JavaScript动态生成 -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 分页 -->
+      <div class="px-6 py-4 border-t border-neutral-200 flex items-center justify-between">
+        <div class="flex-1 flex justify-between sm:hidden">
+          <button class="relative inline-flex items-center px-4 py-2 border border-neutral-300 text-sm font-medium rounded-md text-neutral-700 bg-white hover:bg-neutral-50">
+            上一页
+          </button>
+          <button class="ml-3 relative inline-flex items-center px-4 py-2 border border-neutral-300 text-sm font-medium rounded-md text-neutral-700 bg-white hover:bg-neutral-50">
+            下一页
+          </button>
+        </div>
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm text-neutral-700">
+              显示第 <span class="font-medium" id="currentPageRange">1</span> 至 <span class="font-medium" id="lastPageRange">10</span> 条，共 <span class="font-medium" id="totalRecords">0</span> 条记录
+            </p>
+          </div>
+          <div>
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+              <button class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-neutral-300 bg-white text-sm font-medium text-neutral-500 hover:bg-neutral-50">
+                <span class="sr-only">上一页</span>
+                <i class="fa fa-chevron-left text-xs"></i>
+              </button>
+              <button class="relative inline-flex items-center px-4 py-2 border border-neutral-300 bg-primary text-sm font-medium text-white">
+                1
+              </button>
+              <button class="relative inline-flex items-center px-4 py-2 border border-neutral-300 bg-white text-sm font-medium text-neutral-700 hover:bg-neutral-50">
+                2
+              </button>
+              <button class="relative inline-flex items-center px-4 py-2 border border-neutral-300 bg-white text-sm font-medium text-neutral-700 hover:bg-neutral-50">
+                3
+              </button>
+              <span class="relative inline-flex items-center px-4 py-2 border border-neutral-300 bg-white text-sm font-medium text-neutral-700">
+                ...
+              </span>
+              <button class="relative inline-flex items-center px-4 py-2 border border-neutral-300 bg-white text-sm font-medium text-neutral-700 hover:bg-neutral-50">
+                8
+              </button>
+              <button class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-neutral-300 bg-white text-sm font-medium text-neutral-500 hover:bg-neutral-50">
+                <span class="sr-only">下一页</span>
+                <i class="fa fa-chevron-right text-xs"></i>
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="bg-white border-t border-neutral-200 py-6">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <p class="text-neutral-500 text-sm">© 2023 充电记录管理系统. 保留所有权利.</p>
+        <div class="flex space-x-6 mt-4 md:mt-0">
+          <a href="#" class="text-neutral-500 hover:text-primary transition-colors">
+            <i class="fa fa-question-circle"></i>
+            <span class="ml-1 text-sm">帮助中心</span>
+          </a>
+          <a href="#" class="text-neutral-500 hover:text-primary transition-colors">
+            <i class="fa fa-file-text-o"></i>
+            <span class="ml-1 text-sm">使用条款</span>
+          </a>
+          <a href="#" class="text-neutral-500 hover:text-primary transition-colors">
+            <i class="fa fa-shield"></i>
+            <span class="ml-1 text-sm">隐私政策</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 详情模态框 -->
+  <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div class="p-6 border-b border-neutral-200 flex justify-between items-center sticky top-0 bg-white z-10">
+        <h3 class="text-xl font-semibold">充电记录详情</h3>
+        <button id="closeModal" class="text-neutral-500 hover:text-neutral-800">
+          <i class="fa fa-times text-xl"></i>
+        </button>
+      </div>
+
+      <div class="p-6" id="modalContent">
+        <!-- 详情内容将通过JavaScript动态生成 -->
+      </div>
+
+      <div class="p-6 border-t border-neutral-200 flex justify-end space-x-3 sticky bottom-0 bg-white z-10">
+        <button id="closeDetailBtn" class="px-4 py-2 border border-neutral-300 rounded-lg text-neutral-700 text-sm font-medium hover:bg-neutral-50 transition-colors">
+          关闭
+        </button>
+        <button class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
+          下载记录
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 模拟充电记录数据
+    const chargingRecords = [
+      {
+        id: 'REC0001',
+        deviceId: 'DEV001',
+        startTime: '2023-06-15 08:30:22',
+        endTime: '2023-06-15 10:45:11',
+        amount: 28.5,
+        cost: 57.80,
+        type: '快充',
+        status: 'completed',
+        location: '地下停车场A区',
+        paymentMethod: '微信支付',
+        duration: '2小时15分钟',
+        power: 60,
+        notes: '正常完成充电'
+      },
+      {
+        id: 'REC0002',
+        deviceId: 'DEV002',
+        startTime: '2023-06-15 11:20:05',
+        endTime: '2023-06-15 13:10:33',
+        amount: 19.2,
+        cost: 39.50,
+        type: '慢充',
+        status: 'completed',
+        location: '地面停车场B区',
+        paymentMethod: '支付宝',
+        duration: '1小时50分钟',
+        power: 30,
+        notes: '正常完成充电'
+      },
+      {
+        id: 'REC0003',
+        deviceId: 'DEV001',
+        startTime: '2023-06-16 09:15:47',
+        endTime: '2023-06-16 09:30:12',
+        amount: 3.2,
+        cost: 6.50,
+        type: '快充',
+        status: 'cancelled',
+        location: '地下停车场A区',
+        paymentMethod: '未支付',
+        duration: '14分钟',
+        power: 60,
+        notes: '用户主动取消'
+      },
+      {
+        id: 'REC0004',
+        deviceId: 'DEV003',
+        startTime: '2023-06-16 14:45:33',
+        endTime: '2023-06-16 17:20:55',
+        amount: 42.8,
+        cost: 87.30,
+        type: '快充',
+        status: 'completed',
+        location: '地面停车场C区',
+        paymentMethod: '微信支付',
+        duration: '2小时35分钟',
+        power: 60,
+        notes: '正常完成充电'
+      },
+      {
+        id: 'REC0005',
+        deviceId: 'DEV004',
+        startTime: '2023-06-17 10:05:12',
+        endTime: '',
+        amount: 0,
+        cost: 0,
+        type: '慢充',
+        status: 'charging',
+        location: '地下停车场B区',
+        paymentMethod: '待支付',
+        duration: '正在充电',
+        power: 30,
+        notes: '充电中'
+      },
+      {
+        id: 'REC0006',
+        deviceId: 'DEV002',
+        startTime: '2023-06-17 16:20:45',
+        endTime: '2023-06-17 16:25:33',
+        amount: 0,
+        cost: 0,
+        type: '慢充',
+        status: 'failed',
+        location: '地面停车场B区',
+        paymentMethod: '未支付',
+        duration: '5分钟',
+        power: 30,
+        notes: '设备故障导致充电失败'
+      },
+      {
+        id: 'REC0007',
+        deviceId: 'DEV003',
+        startTime: '2023-06-18 08:10:22',
+        endTime: '2023-06-18 10:30:15',
+        amount: 31.5,
+        cost: 64.20,
+        type: '快充',
+        status: 'completed',
+        location: '地面停车场C区',
+        paymentMethod: '支付宝',
+        duration: '2小时20分钟',
+        power: 60,
+        notes: '正常完成充电'
+      },
+      {
+        id: 'REC0008',
+        deviceId: 'DEV001',
+        startTime: '2023-06-18 15:30:55',
+        endTime: '2023-06-18 17:45:22',
+        amount: 25.8,
+        cost: 52.80,
+        type: '快充',
+        status: 'completed',
+        location: '地下停车场A区',
+        paymentMethod: '微信支付',
+        duration: '2小时15分钟',
+        power: 60,
+        notes: '正常完成充电'
+      },
+      {
+        id: 'REC0009',
+        deviceId: 'DEV004',
+        startTime: '2023-06-19 09:45:11',
+        endTime: '2023-06-19 13:20:33',
+        amount: 48.2,
+        cost: 98.50,
+        type: '慢充',
+        status: 'completed',
+        location: '地下停车场B区',
+        paymentMethod: '支付宝',
+        duration: '3小时35分钟',
+        power: 30,
+        notes: '正常完成充电'
+      },
+      {
+        id: 'REC0010',
+        deviceId: 'DEV002',
+        startTime: '2023-06-19 16:10:05',
+        endTime: '2023-06-19 18:05:47',
+        amount: 22.3,
+        cost: 45.60,
+        type: '慢充',
+        status: 'completed',
+        location: '地面停车场B区',
+        paymentMethod: '微信支付',
+        duration: '1小时55分钟',
+        power: 30,
+        notes: '正常完成充电'
+      }
+    ];
+
+    // 状态样式映射
+    const statusStyles = {
+      'completed': { class: 'bg-success/10 text-success', text: '已完成' },
+      'charging': { class: 'bg-primary/10 text-primary', text: '充电中' },
+      'failed': { class: 'bg-danger/10 text-danger', text: '已失败' },
+      'cancelled': { class: 'bg-neutral-100 text-neutral-600', text: '已取消' }
+    };
+
+    // 初始化页面
+    document.addEventListener('DOMContentLoaded', function() {
+      renderRecords(chargingRecords);
+      updateStatistics();
+      initCharts();
+      setupEventListeners();
+    });
+
+    // 渲染记录表格
+    function renderRecords(records) {
+      const tableBody = document.getElementById('recordsTableBody');
+      tableBody.innerHTML = '';
+
+      if (records.length === 0) {
+        const emptyRow = document.createElement('tr');
+        emptyRow.innerHTML = `
+          <td colspan="9" class="px-6 py-12 text-center text-neutral-500">
+            <div class="flex flex-col items-center">
+              <i class="fa fa-search text-4xl mb-3 text-neutral-300"></i>
+              <p>没有找到匹配的记录</p>
+            </div>
+          </td>
+        `;
+        tableBody.appendChild(emptyRow);
+        return;
+      }
+
+      records.forEach(record => {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-neutral-50 transition-colors';
+        row.innerHTML = `
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-900">${record.id}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-700">${record.deviceId}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-700">${record.startTime}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-700">${record.endTime || '-'}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-700">${record.amount}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-700">${record.cost.toFixed(2)}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-700">${record.type}</td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusStyles[record.status].class}">
+              ${statusStyles[record.status].text}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <button class="text-primary hover:text-primary/80 mr-3 view-detail" data-id="${record.id}">查看</button>
+            <button class="text-neutral-500 hover:text-neutral-700">导出</button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+
+      // 更新记录总数
+      document.getElementById('totalRecords').textContent = records.length;
+
+      // 添加查看详情事件
+      document.querySelectorAll('.view-detail').forEach(button => {
+        button.addEventListener('click', function() {
+          const recordId = this.getAttribute('data-id');
+          showRecordDetail(recordId);
+        });
+      });
+    }
+
+    // 显示记录详情
+    function showRecordDetail(recordId) {
+      const record = chargingRecords.find(r => r.id === recordId);
+      if (!record) return;
+
+      const modalContent = document.getElementById('modalContent');
+      modalContent.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h4 class="text-sm font-medium text-neutral-500 mb-1">记录ID</h4>
+            <p class="text-neutral-800 font-medium">${record.id}</p>
+          </div>
+
+          <div>
+            <h4 class="text-sm font-medium text-neutral-500 mb-1">设备编号</h4>
+            <p class="text-neutral-800">${record.deviceId}</p>
+          </div>
+
+          <div>
+            <h4 class="text-sm font-medium text-neutral-500 mb-1">开始时间</h4>
+            <p class="text-neutral-800">${record.startTime}</p>
+          </div>
+
+          <div>
+            <h4 class="text-sm font-medium text-neutral-500 mb-1">结束时间</h4>
+            <p class="text-neutral-800">${record.endTime || '-'}</p>
+          </div>
+
+          <div>
+            <h4 class="text-sm font-medium text-neutral-500 mb-1">充电量</h4>
+            <p class="text-neutral-800">${record.amount} kWh</p>
+          </div>
+
+          <div>
+            <h4 class="text-sm font-medium text-neutral-500 mb-1">费用</h4>
+            <p class="text-neutral-800">¥${record.cost.toFixed(2)}</p>
+          </div>
+
+          <div>
+            <h4 class="text-sm font-medium text-neutral-500 mb-1">充电类型</h4>
+            <p class="text-neutral-800">${record.type}</p>
+          </div>
+
+          <div>
+            <h4 class="text-sm font-medium text-neutral-500 mb-1">状态</h4>
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusStyles[record.status].class}">
+              ${statusStyles[record.status].text}
+            </span>
+          </div>
+
+          <div>
+            <h4 class="text-sm font-medium text-neutral-500 mb-1">位置</h4>
+            <p class="text-neutral-800">${record.location}</p>
+          </div>
+
+          <div>
+            <h4 class="text-sm font-medium text-neutral-500 mb-1">支付方式</h4>
+            <p class="text-neutral-800">${record.paymentMethod}</p>
+          </div>
+
+          <div>
+            <h4 class="text-sm font-medium text-neutral-500 mb-1">充电时长</h4>
+            <p class="text-neutral-800">${record.duration}</p>
+          </div>
+
+          <div>
+            <h4 class="text-sm font-medium text-neutral-500 mb-1">功率</h4>
+            <p class="text-neutral-800">${record.power} kW</p>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <h4 class="text-sm font-medium text-neutral-500 mb-1">备注</h4>
+          <p class="text-neutral-800">${record.notes}</p>
+        </div>
+      `;
+
+      // 显示模态框
+      document.getElementById('detailModal').classList.remove('hidden');
+      document.getElementById('detailModal').classList.add('flex');
+    }
+
+    // 更新统计数据
+    function updateStatistics() {
+      // 计算本月充电次数
+      const monthlyCount = chargingRecords.filter(r => new Date(r.startTime).getMonth() === new Date().getMonth()).length;
+      document.getElementById('monthlyCount').textContent = monthlyCount;
+
+      // 计算本月充电总量
+      const monthlyTotal = chargingRecords
+        .filter(r => new Date(r.startTime).getMonth() === new Date().getMonth())
+        .reduce((sum, r) => sum + r.amount, 0);
+      document.getElementById('monthlyTotal').textContent = monthlyTotal.toFixed(1) + ' kWh';
+
+      // 计算本月充电费用
+      const monthlyCost = chargingRecords
+        .filter(r => new Date(r.startTime).getMonth() === new Date().getMonth())
+        .reduce((sum, r) => sum + r.cost, 0);
+      document.getElementById('monthlyCost').textContent = '¥' + monthlyCost.toFixed(2);
+
+      // 计算平均充电时长（简化计算）
+      const completedRecords = chargingRecords.filter(r => r.status === 'completed');
+      if (completedRecords.length > 0) {
+        const avgDuration = (completedRecords.reduce((sum, r) => {
+          const start = new Date(r.startTime);
+          const end = new Date(r.endTime);
+          return sum + (end - start) / (1000 * 60 * 60); // 转换为小时
+        }, 0) / completedRecords.length).toFixed(1);
+        document.getElementById('avgDuration').textContent = avgDuration + ' 小时';
+      }
+    }
+
+    // 初始化图表
+    function initCharts() {
+      // 充电趋势图表
+      const trendCtx = document.getElementById('chargingTrendChart').getContext('2d');
+
+      // 准备过去7天的数据
+      const today = new Date();
+      const labels = [];
+      const amountData = [];
+      const costData = [];
+
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        labels.push(`${date.getMonth() + 1}/${date.getDate()}`);
+
+        // 模拟每日充电量和费用数据
+        const dailyAmount = Math.floor(Math.random() * 30) + 10;
+        const dailyCost = dailyAmount * 2.1;
+
+        amountData.push(dailyAmount);
+        costData.push(dailyCost.toFixed(1));
+      }
+
+      const trendChart = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: '充电量 (kWh)',
+              data: amountData,
+              borderColor: '#165DFF',
+              backgroundColor: 'rgba(22, 93, 255, 0.1)',
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: '费用 (¥)',
+              data: costData,
+              borderColor: '#36CFC9',
+              backgroundColor: 'rgba(54, 207, 201, 0.1)',
+              tension: 0.4,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            tooltip: {
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              titleColor: '#262626',
+              bodyColor: '#525252',
+              borderColor: '#E5E5E5',
+              borderWidth: 1,
+              padding: 12,
+              boxPadding: 6,
+              usePointStyle: true,
+              callbacks: {
+                label: function(context) {
+                  return context.dataset.label + ': ' + context.raw;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              }
+            }
+          },
+          animation: {
+            duration: 1000,
+            easing: 'easeOutQuart'
+          }
+        }
+      });
+
+      // 充电类型分布图表
+      const typeCtx = document.getElementById('chargingTypeChart').getContext('2d');
+
+      // 统计充电类型数据
+      const fastChargeCount = chargingRecords.filter(r => r.type === '快充').length;
+      const slowChargeCount = chargingRecords.filter(r => r.type === '慢充').length;
+
+      const typeChart = new Chart(typeCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['快充', '慢充'],
+          datasets: [{
+            data: [fastChargeCount, slowChargeCount],
+            backgroundColor: [
+              '#165DFF',
+              '#36CFC9'
+            ],
+            borderWidth: 0,
+            hoverOffset: 5
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '70%',
+          plugins: {
+            legend: {
+              position: 'bottom'
+            },
+            tooltip: {
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              titleColor: '#262626',
+              bodyColor: '#525252',
+              borderColor: '#E5E5E5',
+              borderWidth: 1,
+              padding: 12,
+              boxPadding: 6,
+              usePointStyle: true,
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.raw || 0;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = Math.round((value / total) * 100);
+                  return `${label}: ${value} 次 (${percentage}%)`;
+                }
+              }
+            }
+          },
+          animation: {
+            animateRotate: true,
+            animateScale: true,
+            duration: 1000,
+            easing: 'easeOutQuart'
+          }
+        }
+      });
+    }
+
+    // 设置事件监听器
+    function setupEventListeners() {
+      // 关闭模态框
+      document.getElementById('closeModal').addEventListener('click', function() {
+        document.getElementById('detailModal').classList.add('hidden');
+        document.getElementById('detailModal').classList.remove('flex');
+      });
+
+      document.getElementById('closeDetailBtn').addEventListener('click', function() {
+        document.getElementById('detailModal').classList.add('hidden');
+        document.getElementById('detailModal').classList.remove('flex');
+      });
+
+      // 点击模态框外部关闭
+      document.getElementById('detailModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.add('hidden');
+          this.classList.remove('flex');
+        }
+      });
+
+      // 刷新按钮
+      document.getElementById('refreshBtn').addEventListener('click', function() {
+        this.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>刷新中...';
+
+        // 模拟刷新延迟
+        setTimeout(() => {
+          renderRecords(chargingRecords);
+          updateStatistics();
+          this.innerHTML = '<i class="fa fa-refresh mr-2"></i>刷新记录';
+
+          // 显示成功提示
+          showToast('记录已刷新');
+        }, 800);
+      });
+
+      // 导出按钮
+      document.getElementById('exportBtn').addEventListener('click', function() {
+        showToast('数据导出中，请稍候...');
+
+        // 模拟导出延迟
+        setTimeout(() => {
+          showToast('数据已成功导出');
+        }, 1500);
+      });
+
+      // 应用筛选
+      document.getElementById('applyFilter').addEventListener('click', function() {
+        const deviceId = document.getElementById('deviceSelect').value;
+        const status = document.getElementById('statusSelect').value;
+        const date = document.getElementById('dateFilter').value;
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+        // 筛选记录
+        let filteredRecords = chargingRecords;
+
+        if (deviceId) {
+          filteredRecords = filteredRecords.filter(r => r.deviceId === deviceId);
+        }
+
+        if (status) {
+          filteredRecords = filteredRecords.filter(r => r.status === status);
+        }
+
+        if (date) {
+          filteredRecords = filteredRecords.filter(r => {
+            const recordDate = new Date(r.startTime).toISOString().split('T')[0];
+            return recordDate === date;
+          });
+        }
+
+        if (searchTerm) {
+          filteredRecords = filteredRecords.filter(r => {
+            return r.id.toLowerCase().includes(searchTerm) ||
+                   r.deviceId.toLowerCase().includes(searchTerm) ||
+                   r.startTime.toLowerCase().includes(searchTerm);
+          });
+        }
+
+        renderRecords(filteredRecords);
+        showToast(`已筛选出 ${filteredRecords.length} 条记录`);
+      });
+
+      // 重置筛选
+      document.getElementById('resetFilter').addEventListener('click', function() {
+        document.getElementById('deviceSelect').value = '';
+        document.getElementById('statusSelect').value = '';
+        document.getElementById('dateFilter').value = '';
+        document.getElementById('searchInput').value = '';
+
+        renderRecords(chargingRecords);
+      });
+
+      // 导航栏滚动效果
+      window.addEventListener('scroll', function() {
+        const navbar = document.getElementById('navbar');
+        if (window.scrollY > 10) {
+          navbar.classList.add('shadow');
+        } else {
+          navbar.classList.remove('shadow');
+        }
+      });
+
+      // 图表周期切换
+      document.querySelectorAll('.chart-period-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.chart-period-btn').forEach(b => {
+            b.classList.remove('bg-primary', 'text-white');
+            b.classList.add('bg-neutral-100', 'text-neutral-600', 'hover:bg-neutral-200');
+          });
+
+          this.classList.remove('bg-neutral-100', 'text-neutral-600', 'hover:bg-neutral-200');
+          this.classList.add('bg-primary', 'text-white');
+
+          // 这里可以添加切换图表数据的逻辑
+          showToast(`已切换为${this.textContent}视图`);
+        });
+      });
+    }
+
+    // 显示提示消息
+    function showToast(message) {
+      // 检查是否已存在toast
+      let toast = document.querySelector('.toast-notification');
+
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.className = 'toast-notification fixed bottom-6 right-6 bg-neutral-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 transform translate-y-20 opacity-0 transition-all duration-300';
+        document.body.appendChild(toast);
+      }
+
+      toast.textContent = message;
+
+      // 显示toast
+      setTimeout(() => {
+        toast.classList.remove('translate-y-20', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+      }, 10);
+
+      // 3秒后隐藏
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

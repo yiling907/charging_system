@@ -502,21 +502,7 @@
     }
 
     async function handleCreateOrder() {
-        const selectedPackage = document.querySelector(`.package-item[data-id="${selectedPackageId}"]`);
-        try {
-            // 下单 更新charger status，创建charging history, init payment
-            const response = await axios.post('/api/charging/', {
-                package_id: selectedPackageId,
-                package_name: selectedPackage.dataset.name,
-                total_price: selectedPackage.dataset.price
-            });
-            // 下单成功：跳转订单详情页
-            alert('下单成功！');
-            window.location.href = `/orders/detail/${response.data.id}/`; // 订单详情路由
-        } catch (err) {
-            alert('下单失败：' + (err.response?.data?.message || '请重试'));
-        }
-        showDialog('预约成功', '已为您预约该充电桩，保留15分钟，请尽快前往');
+        window.location.href = `/order_create/`+ chargerId;
     }
 
     function showHistory() {

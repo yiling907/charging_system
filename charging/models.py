@@ -83,6 +83,11 @@ class ChargingRecord(models.Model):
         ('paid', 'Paid'),
         ('refunded', 'Refunded'),
     )
+    STATUS = (
+        ('completed', 'Unpaid'),
+        ('charging', 'Paid'),
+        ('failed', 'Refunded'),
+    )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     charger = models.ForeignKey(Charger, on_delete=models.CASCADE, related_name="records")
@@ -93,6 +98,7 @@ class ChargingRecord(models.Model):
     electricity = models.DecimalField("Energy (kWh)", max_digits=5, decimal_places=2, null=True, blank=True)
     fee = models.DecimalField("Total Fee (¥)", max_digits=6, decimal_places=2, null=True, blank=True)
     pay_status = models.CharField("Payment Status", max_length=10, choices=PAY_STATUS, default='unpaid')
+    status = models.CharField("Status", max_length=10, choices=STATUS, default='charging')
     transaction_id = models.CharField("Transaction ID", max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

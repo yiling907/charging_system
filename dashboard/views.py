@@ -8,7 +8,6 @@ from charging.models import ChargingRecord, Station, Charger
 
 
 class DashboardStatsView(APIView):
-    permission_classes = [IsAdminUser]
 
     def get(self, request):
         """Get key performance indicators"""
