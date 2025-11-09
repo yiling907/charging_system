@@ -89,7 +89,7 @@
         <div class="flex justify-between items-center h-16">
             <div class="flex items-center">
                 <i class="fa fa-bolt text-primary text-2xl mr-2"></i>
-                <h1 class="text-xl font-semibold text-neutral-800">充电记录管理系统</h1>
+                <h1 class="text-xl font-semibold text-neutral-800"><a href="{% url 'available_station' %}">充电记录管理系统</a></h1>
             </div>
 
             <div class="flex items-center space-x-4">
@@ -101,7 +101,7 @@
                 <div class="flex items-center space-x-2">
                     <img src="https://picsum.photos/id/64/40/40" alt="用户头像"
                          class="w-8 h-8 rounded-full object-cover">
-                    <span class="hidden md:inline-block text-sm font-medium">管理员</span>
+                    <a class="hidden md:inline-block text-sm font-medium" href="{% url 'user_inform' %}">管理员</a>
                 </div>
             </div>
         </div>
@@ -200,14 +200,16 @@
                 </div>
                 <div>
                     <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                        <button id="prevPageBtn" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-neutral-300 bg-white text-sm font-medium text-neutral-500 hover:bg-neutral-50">
+                        <button id="prevPageBtn"
+                                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-neutral-300 bg-white text-sm font-medium text-neutral-500 hover:bg-neutral-50">
                             <span class="sr-only">上一页</span>
                             <i class="fa fa-chevron-left text-xs"></i>
                         </button>
                         <div id="paginationContainer" class="flex">
                             <!-- 分页按钮将通过JS动态生成 -->
                         </div>
-                        <button id="nextPageBtn" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-neutral-300 bg-white text-sm font-medium text-neutral-500 hover:bg-neutral-50">
+                        <button id="nextPageBtn"
+                                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-neutral-300 bg-white text-sm font-medium text-neutral-500 hover:bg-neutral-50">
                             <span class="sr-only">下一页</span>
                             <i class="fa fa-chevron-right text-xs"></i>
                         </button>
@@ -268,7 +270,8 @@
 </div>
 
 <!-- 加载提示 -->
-<div id="loadingToast" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-neutral-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 hidden">
+<div id="loadingToast"
+     class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-neutral-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 hidden">
     <span id="loadingText">加载中...</span>
 </div>
 
@@ -312,7 +315,7 @@
         document.getElementById('closeDetailBtn').addEventListener('click', closeDetailModal);
 
         // 点击模态框背景关闭
-        document.getElementById('detailModal').addEventListener('click', function(e) {
+        document.getElementById('detailModal').addEventListener('click', function (e) {
             if (e.target === this) {
                 closeDetailModal();
             }
@@ -468,7 +471,7 @@
         }
         fetchRecords(page);
         // 滚动到表格顶部
-        document.querySelector('.card-shadow').scrollIntoView({ behavior: 'smooth' });
+        document.querySelector('.card-shadow').scrollIntoView({behavior: 'smooth'});
     }
 
     // 上一页

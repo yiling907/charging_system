@@ -4,159 +4,120 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>充电口查询（Google Maps）</title>
-  <style>
-    /* 样式与之前保持一致 */
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-    }
+  <!-- 优先引入基础资源 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
 
-    .search-box {
-      margin: 20px 0;
-      display: flex;
-      gap: 10px;
+  <!-- 简化 Tailwind 配置，确保兼容性 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#4285F4',
+            secondary: '#34A853',
+          }
+        }
+      }
     }
+  </script>
 
-    #addressInput {
-      flex: 1;
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-
-    #searchBtn {
-      padding: 10px 20px;
-      background: #4285F4; /* Google 蓝 */
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    #searchBtn:hover {
-      background: #3367d6;
-    }
-
-    .result-title {
-      font-size: 18px;
-      margin: 20px 0 10px;
-      color: #333;
-    }
-
-    .port-list {
-      list-style: none;
-      padding: 0;
-    }
-
-    .port-item {
-      padding: 15px;
-      margin: 10px 0;
-      border: 1px solid #eee;
-      border-radius: 8px;
-      transition: box-shadow 0.2s;
-    }
-
-    .port-item:hover {
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .port-name {
-      font-weight: bold;
-      font-size: 17px;
-      margin-bottom: 5px;
-    }
-
-    .port-address {
-      color: #666;
-      font-size: 14px;
-      margin-bottom: 8px;
-    }
-
-    .port-meta {
-      font-size: 14px;
-      color: #333;
-    }
-
-    .distance {
-      color: #4285F4;
-      margin-left: 10px;
-    }
-
-    .loading {
-      color: #666;
-      padding: 20px;
-      text-align: center;
+  <!-- 基础工具类，避免复杂语法 -->
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .card {
+        @apply bg-white rounded-lg border border-gray-200 overflow-hidden;
+      }
+      .card-hover {
+        @apply hover:shadow-md hover:-translate-y-1 transition-all duration-200;
+      }
     }
   </style>
 </head>
-<body>
-  <!-- 搜索区域 -->
-  <div class="search-box">
-    <input
-      type="text"
-      id="addressInput"
-      placeholder="输入地址（如：New York, NY）搜索最近的充电口"
-    >
-    <button id="searchBtn">搜索</button>
+<body class="bg-gray-50 min-h-screen p-4 md:p-6">
+  <div class="max-w-5xl mx-auto">
+    <!-- 页面标题 -->
+    <header class="mb-6">
+      <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
+        <i class="fa fa-plug text-primary mr-2"></i>充电口查询
+      </h1>
+    </header>
+
+    <!-- 搜索区域 -->
+    <div class="mb-8">
+      <div class="flex flex-col sm:flex-row gap-3">
+        <input
+          type="text"
+          id="addressInput"
+          placeholder="输入地址（如：北京市朝阳区）搜索最近的充电口"
+          class="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+        >
+        <button id="searchBtn" class="bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center">
+          <i class="fa fa-search mr-2"></i>搜索
+        </button>
+      </div>
+    </div>
+
+    <!-- 结果标题 -->
+    <div id="resultTitle" class="text-lg font-semibold text-gray-800 mb-4">
+      所有可用充电口
+    </div>
+
+    <!-- 充电口列表容器 -->
+    <ul id="portList" class="space-y-4">
+      <!-- 列表内容由JS动态生成 -->
+    </ul>
   </div>
 
-  <!-- 结果标题 -->
-  <div class="result-title" id="resultTitle">所有可用充电口</div>
-
-  <!-- 充电口列表容器 -->
-  <ul class="port-list" id="portList"></ul>
-
-  <!-- 引入 Google Maps 地理编码 API（需替换为你的 Key） -->
+  <!-- Google Maps API -->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9-wKqdz9VULz9XwCkMXRcJJSjTyIxvXM&libraries=places"></script>
 
   <script>
     // 全局变量
-    let allPorts = []; // 所有可用充电口数据
+    let allPorts = [];
     const portListEl = document.getElementById('portList');
     const resultTitleEl = document.getElementById('resultTitle');
     const addressInput = document.getElementById('addressInput');
     const searchBtn = document.getElementById('searchBtn');
 
-    // 页面加载时初始化
+    // 页面加载初始化
     window.onload = async () => {
-      await fetchAllPorts(); // 获取充电口数据
-      renderPorts(allPorts, false); // 渲染初始列表
+      await fetchAllPorts();
+      renderPorts(allPorts, false);
 
-      // 绑定搜索事件
+      // 绑定事件
       searchBtn.addEventListener('click', searchNearby);
-      addressInput.addEventListener('keyup', (e) => {
-        if (e.key === 'Enter') searchNearby();
-      });
+      addressInput.addEventListener('keyup', (e) => e.key === 'Enter' && searchNearby());
     };
 
     /**
-     * 1. 从后端获取所有可用充电口
+     * 获取充电口数据
      */
     async function fetchAllPorts() {
       try {
         showLoading();
-        const response = await fetch('/api/charging/stations/?charger_status=idle',{
-            headers: {
-                    'Token': localStorage.getItem('token')
-                },
-        }); // 替换为实际接口
+        const response = await fetch('/api/charging/stations/?charger_status=idle', {
+          headers: { 'Token': localStorage.getItem('token') }
+        });
         const data = await response.json();
-        console.log(data)
-        allPorts = data.results
-          console.log(allPorts)
+        allPorts = data.results || [];
       } catch (error) {
-        console.error('获取充电口数据失败：', error);
-        portListEl.innerHTML = '<li class="loading">数据加载失败，请重试</li>';
+        portListEl.innerHTML = `
+          <li class="card p-6 text-center">
+            <i class="fa fa-exclamation-circle text-red-500 text-2xl mb-2"></i>
+            <p class="text-gray-600">数据加载失败，请刷新页面重试</p>
+          </li>
+        `;
       } finally {
         hideLoading();
       }
     }
 
     /**
-     * 2. 搜索最近的充电口（核心逻辑）
+     * 搜索附近充电口
      */
     async function searchNearby() {
       const address = addressInput.value.trim();
@@ -167,118 +128,132 @@
 
       try {
         showLoading();
-        // a. 调用 Google 地理编码 API 将地址转为经纬度
         const { lat, lng } = await addressToLatLng(address);
         if (!lat || !lng) {
-          alert('地址解析失败，请检查地址是否正确');
+          alert('地址解析失败，请检查地址格式');
           return;
         }
 
-        // b. 计算距离并排序
+        // 计算距离并排序
         const portsWithDistance = allPorts.map(port => ({
           ...port,
-          distance: calculateDistance(
-            lat, lng,
-            port.latitude, port.longitude
-          )
-        }));
-
-        // c. 按距离升序排序
-        const sortedPorts = portsWithDistance
-          .filter(port => port.distance !== null)
+          distance: calculateDistance(lat, lng, port.latitude, port.longitude)
+        })).filter(port => port.distance !== null)
           .sort((a, b) => a.distance - b.distance);
 
-        // d. 渲染结果
-        renderPorts(sortedPorts, true);
+        renderPorts(portsWithDistance, true);
       } catch (error) {
-        console.error('搜索失败：', error);
-        portListEl.innerHTML = '<li class="loading">搜索失败，请重试</li>';
+        portListEl.innerHTML = `
+          <li class="card p-6 text-center">
+            <i class="fa fa-exclamation-circle text-red-500 text-2xl mb-2"></i>
+            <p class="text-gray-600">搜索失败，请重试</p>
+          </li>
+        `;
       } finally {
         hideLoading();
       }
     }
 
     /**
-     * 3. 渲染充电口列表
+     * 渲染充电口列表
      */
     function renderPorts(stations, isSearchResult) {
       if (stations.length === 0) {
-        portListEl.innerHTML = '<li class="loading">暂无可用充电口</li>';
+        portListEl.innerHTML = `
+          <li class="card p-8 text-center">
+            <i class="fa fa-map-marker text-gray-300 text-4xl mb-3"></i>
+            <p class="text-gray-700 font-medium">暂无可用充电口</p>
+            <p class="text-gray-500 text-sm mt-1">请尝试其他地址搜索</p>
+          </li>
+        `;
         resultTitleEl.textContent = isSearchResult ? '未找到匹配的充电口' : '所有可用充电口';
         return;
       }
 
       resultTitleEl.textContent = isSearchResult
-        ? `附近可用充电口（共 ${stations.length} 个，由近及远）`
+        ? `附近可用充电口（共 ${stations.length} 个）`
         : `所有可用充电口（共 ${stations.length} 个）`;
 
       portListEl.innerHTML = stations.map(station => `
-        <li class="port-item" >
-            <a href="/stations/${station.id}" class="port-link"><div class="port-name">${station.name}</div></a>
-          <div class="port-address">${station.address}</div>
-          <div class="port-meta">
-            类型：${station.chargers_type} | 更新时间：${station.updated_at} | 可用充电桩数量：${station.avaliable_count}
-            ${isSearchResult ? `<span class="distance">距离：${station.distance.toFixed(1)} 公里</span>` : ''}
+        <li class="card card-hover">
+          <div class="p-4">
+            <a href="/stations/${station.id}" class="block">
+              <div class="font-semibold text-gray-800 text-lg mb-2 flex items-center">
+                <i class="fa fa-bolt text-yellow-500 mr-2"></i>
+                ${station.name}
+              </div>
+            </a>
+
+            <div class="text-gray-600 text-sm mb-3 flex items-center">
+              <i class="fa fa-map-marker text-primary mr-2"></i>
+              ${station.address}
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
+              <div><i class="fa fa-plug text-gray-400 mr-1"></i>类型：${station.chargers_type}</div>
+              <div><i class="fa fa-clock-o text-gray-400 mr-1"></i>更新：${station.updated_at}</div>
+              <div><i class="fa fa-check-circle text-secondary mr-1"></i>可用：${station.avaliable_count}个</div>
+
+              ${isSearchResult ? `
+                <div class="md:col-span-3 mt-2 text-primary font-medium">
+                  <i class="fa fa-road mr-1"></i>距离：${station.distance.toFixed(1)}公里
+                </div>
+              ` : ''}
+            </div>
           </div>
         </li>
       `).join('');
     }
 
     /**
-     * 工具函数：地址转经纬度（使用 Google 地理编码 API）
-     * @param {string} address - 用户输入的地址
-     * @returns {Promise} { lat: 纬度, lng: 经度 }
+     * 地址转经纬度
      */
     function addressToLatLng(address) {
       return new Promise((resolve, reject) => {
-        const geocoder = new google.maps.Geocoder(); // Google 地理编码器
-          console.log(address)
-
-        geocoder.geocode({ address: address }, (results, status) => {
-          if (status === google.maps.GeocoderStatus.OK && results.length > 0) {
-            const location = results[0].geometry.location;
-            resolve({
-              lat: location.lat(), // 纬度
-              lng: location.lng()  // 经度
-            });
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ address }, (results, status) => {
+          if (status === google.maps.GeocoderStatus.OK && results.length) {
+            const loc = results[0].geometry.location;
+            resolve({ lat: loc.lat(), lng: loc.lng() });
           } else {
-            reject(`地址解析失败（状态：${status}）`);
+            reject('地址解析失败');
           }
         });
       });
     }
 
     /**
-     * 工具函数：Haversine 公式计算两点距离（公里）
+     * 计算两点距离
      */
     function calculateDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371; // 地球半径（公里）
+      const R = 6371;
       const dLat = toRadians(lat2 - lat1);
       const dLon = toRadians(lon2 - lon1);
       const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
         Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c; // 距离（公里）
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
     }
 
-    /**
-     * 角度转弧度
-     */
     function toRadians(degrees) {
       return degrees * (Math.PI / 180);
     }
 
     /**
-     * 显示/隐藏加载状态
+     * 加载状态
      */
     function showLoading() {
-      portListEl.innerHTML = '<li class="loading">加载中...</li>';
+      portListEl.innerHTML = `
+        <li class="card p-6 text-center">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mb-2"></div>
+          <p class="text-gray-600">加载中...</p>
+        </li>
+      `;
     }
 
     function hideLoading() {
-      // 加载状态会被后续渲染覆盖
+      // 由后续渲染覆盖
     }
   </script>
 </body>

@@ -87,6 +87,7 @@ CORS_ALLOW_METHODS = (
     'VIEW',
 )
 CORS_ALLOW_HEADERS = (
+    'Token',
     'XMLHttpRequest',
     'X_FILENAME',
     'accept-encoding',
