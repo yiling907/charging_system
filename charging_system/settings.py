@@ -104,7 +104,8 @@ CORS_ALLOW_HEADERS = (
 # settings.py
 SWAGGER_SETTINGS = {
     'schemes': ['https'],  # 只保留 HTTPS 协议
-    'DEFAULT_API_URL': 'https://ceeaa818de514c64be3de06ffa515775.vfs.cloud9.us-east-1.amazonaws.com',  # 替换为你的 Cloud9 HTTPS 地址
+    'DEFAULT_API_URL': 'https://ceeaa818de514c64be3de06ffa515775.vfs.cloud9.us-east-1.amazonaws.com',
+    'charging-system-dev.eba-9c5tpywh.us-east-1.elasticbeanstalk.com'
 }
 
 ROOT_URLCONF = 'charging_system.urls'
