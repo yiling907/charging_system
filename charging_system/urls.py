@@ -27,6 +27,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/charging/', include('charging.urls')),
     path('api/dashboard/', include('dashboard.urls')),
+    path('api/v1/', include('proxy_api.urls')),
     path('user/login/', views.index, name='login'),
     path('register/', views.register, name='register'),
     path('home/', views.index, name='home'),
@@ -37,5 +38,4 @@ urlpatterns = [
     path('chargers/<id>', views.chargers_detail, name='chargers'),
     path('records/', views.records, name='records'),
     path('temp/', views.temp, name='temp'),
-
 ]

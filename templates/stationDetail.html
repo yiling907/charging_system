@@ -439,9 +439,33 @@
     </div>
 </div>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=GOOGLE_MAP_API_KEY"
-        defer></script>
 <script>
+    
+    async function loadApiKey() {
+    try {
+      const response = await fetch('/api/v1/google_api_key', {
+          headers: { 'Token': localStorage.getItem('token') }
+        });
+      const { google_maps_api_key } = await response.json();
+      console.log(google_maps_api_key)
+
+      if (window.google && window.google.maps) {
+      initMap();  // 已加载则直接初始化
+      return;
+    }
+
+    // 动态加载 SDK 并监听加载完成
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${google_maps_api_key}`;
+    script.async = true;
+    script.defer = true;
+    // 加载完成后初始化地图
+    script.onload = initMap;
+    script.onerror = () => console.error("Google Maps SDK 加载失败");
+    document.head.appendChild(script);
+  }catch (err) {
+    console.error("获取 API Key 失败：", err);
+  }}
     // 获取URL中的站点ID
     const getStationId = () => {
         const params = window.location.pathname.split('/')
@@ -575,7 +599,6 @@
             const station = await response.json();
             console.log(station)
             renderStationDetail(station);
-            initMap();
         } catch (error) {
             showDialog('加载失败', error.message);
             console.error(error);
@@ -630,7 +653,8 @@
     }
 
     // 初始化
-    window.onload = () => {
+    window.onload = async () => {
+        loadApiKey();
         fetchStationDetail();
         // 定时刷新数据（1分钟一次）
         setInterval(fetchStationDetail, 60000);

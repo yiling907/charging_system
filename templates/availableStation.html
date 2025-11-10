@@ -73,9 +73,26 @@
   </div>
 
   <!-- Google Maps API -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=GOOGLE_MAP_API_KEY&libraries=places"></script>
-
   <script>
+   async function loadApiKey() {
+    try {
+      const response = await fetch('/api/v1/google_api_key', {
+          headers: { 'Token': localStorage.getItem('token') }
+        });
+      const { google_maps_api_key } = await response.json();
+      console.log(google_maps_api_key)
+
+    // 动态加载 SDK 并监听加载完成
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${google_maps_api_key}`;
+    script.async = true;
+    script.defer = true;
+    // 加载完成后初始化地图
+    script.onerror = () => console.error("Google Maps SDK 加载失败");
+    document.head.appendChild(script);
+  }catch (err) {
+    console.error("获取 API Key 失败：", err);
+  }}
     // 全局变量
     let allPorts = [];
     const portListEl = document.getElementById('portList');
@@ -85,6 +102,7 @@
 
     // 页面加载初始化
     window.onload = async () => {
+      await loadApiKey();
       await fetchAllPorts();
       renderPorts(allPorts, false);
 

@@ -7,7 +7,7 @@ SECRET_KEY = 'django-insecure-your-secret-key-here'  # 生产环境需更换
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['ceeaa818de514c64be3de06ffa515775.vfs.cloud9.us-east-1.amazonaws.com']
 
 LOGGING = {
     'version': 1,  # 日志配置版本（固定为1）
@@ -62,12 +62,13 @@ INSTALLED_APPS = [
     'charging',
     'payments',
     'dashboard',
+    'proxy_api'
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -75,7 +76,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ORIGIN_WHITELIST = ()
 CORS_ALLOW_METHODS = (
     'DELETE',
@@ -99,6 +100,12 @@ CORS_ALLOW_HEADERS = (
     'x-csrftoken',
     'x-requested-with',
 )
+
+# settings.py
+SWAGGER_SETTINGS = {
+    'schemes': ['https'],  # 只保留 HTTPS 协议
+    'DEFAULT_API_URL': 'https://ceeaa818de514c64be3de06ffa515775.vfs.cloud9.us-east-1.amazonaws.com',  # 替换为你的 Cloud9 HTTPS 地址
+}
 
 ROOT_URLCONF = 'charging_system.urls'
 
