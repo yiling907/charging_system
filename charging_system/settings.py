@@ -7,7 +7,9 @@ SECRET_KEY = 'django-insecure-your-secret-key-here'  # 生产环境需更换
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['ceeaa818de514c64be3de06ffa515775.vfs.cloud9.us-east-1.amazonaws.com']
+ALLOWED_HOSTS = ['ceeaa818de514c64be3de06ffa515775.vfs.cloud9.us-east-1.amazonaws.com',
+        'charging-system-dev.eba-9c5tpywh.us-east-1.elasticbeanstalk.com',
+]
 
 LOGGING = {
     'version': 1,  # 日志配置版本（固定为1）
@@ -105,7 +107,6 @@ CORS_ALLOW_HEADERS = (
 SWAGGER_SETTINGS = {
     'schemes': ['https'],  # 只保留 HTTPS 协议
     'DEFAULT_API_URL': 'https://ceeaa818de514c64be3de06ffa515775.vfs.cloud9.us-east-1.amazonaws.com',
-    'charging-system-dev.eba-9c5tpywh.us-east-1.elasticbeanstalk.com'
 }
 
 ROOT_URLCONF = 'charging_system.urls'
