@@ -7,40 +7,43 @@ SECRET_KEY = 'django-insecure-your-secret-key-here'  # 生产环境需更换
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['ceeaa818de514c64be3de06ffa515775.vfs.cloud9.us-east-1.amazonaws.com',
-        'charging-sys-dev.eba-9c5tpywh.us-east-1.elasticbeanstalk.com',
-]
+ALLOWED_HOSTS = ['*']
 
+# settings.py
 LOGGING = {
-    'version': 1,  # 日志配置版本（固定为1）
-    'disable_existing_loggers': False,  # 不禁用已存在的日志器
-    'formatters': {  # 日志格式
-        'verbose': {  # 详细格式
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
             'format': '{levelname} {asctime} {module} {message}',
-            'style': '{',  # 使用 `{}` 作为格式符
-        },
-        'simple': {  # 简单格式
-            'format': '{levelname} {message}',
             'style': '{',
         },
     },
-    'handlers': {  # 日志处理器
-        'console': {  # 输出到控制台
-            'level': 'DEBUG',  # 处理 DEBUG 及以上级别
-            'class': 'logging.StreamHandler',  # 控制台输出类
-            'formatter': 'verbose',  # 使用 verbose 格式
+    'handlers': {
+        # 输出到文件
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/django/app.log',  # 日志文件路径（EB 实例中需有写入权限）
+            'formatter': 'verbose',
+        },
+        # 同时输出到控制台（方便通过 eb logs 查看）
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
         },
     },
-    'loggers': {  # 日志器
-        'django': {  # Django 自带日志器（捕获框架内部日志）
-            'handlers': ['console'],  # 使用 console 处理器
-            'level': 'INFO',  # 记录 INFO 及以上级别
-            'propagate': True,  # 是否向上级日志器传递
+    'loggers': {
+        'django': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
-        'myapp': {  # 自定义应用日志器（替换为你的 app 名称）
-            'handlers': ['console'],
-            'level': 'DEBUG',  # 开发环境建议用 DEBUG
-            'propagate': False,  # 不向上传递（避免重复记录）
+        'charging_system': { 
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
     },
 }
