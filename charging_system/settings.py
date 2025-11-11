@@ -8,7 +8,7 @@ SECRET_KEY = 'django-insecure-your-secret-key-here'  # 生产环境需更换
 DEBUG = True
 
 ALLOWED_HOSTS = ['ceeaa818de514c64be3de06ffa515775.vfs.cloud9.us-east-1.amazonaws.com',
-        'charging-system-dev.eba-9c5tpywh.us-east-1.elasticbeanstalk.com',
+        'charging-sys-dev.eba-9c5tpywh.us-east-1.elasticbeanstalk.com',
 ]
 
 LOGGING = {
