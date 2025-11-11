@@ -1,6 +1,6 @@
 env
 __pycache__/
-
+log/
 .DS_Store
 # Elastic Beanstalk Files
 .elasticbeanstalk/*

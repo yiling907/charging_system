@@ -9,7 +9,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-# settings.py
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -20,33 +19,24 @@ LOGGING = {
         },
     },
     'handlers': {
-        # 输出到文件
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': '/var/log/django/app.log',  # 日志文件路径（EB 实例中需有写入权限）
+            'filename': './log/django/app.log',
             'formatter': 'verbose',
         },
-        # 同时输出到控制台（方便通过 eb logs 查看）
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
     },
-    'loggers': {
-        'django': {
-            'handlers': ['file', 'console'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'charging_system': { 
-            'handlers': ['file', 'console'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
     },
 }
+
 # 应用配置
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -109,7 +99,6 @@ CORS_ALLOW_HEADERS = (
 # settings.py
 SWAGGER_SETTINGS = {
     'schemes': ['https'],  # 只保留 HTTPS 协议
-    'DEFAULT_API_URL': 'https://ceeaa818de514c64be3de06ffa515775.vfs.cloud9.us-east-1.amazonaws.com',
 }
 
 ROOT_URLCONF = 'charging_system.urls'
