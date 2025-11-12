@@ -156,6 +156,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="base.js"></script>
+
     <script>
         // 全局变量：存储选中的头像文件
         let selectedAvatarFile = null;
@@ -166,7 +168,7 @@
                 axios.defaults.headers.common['Authorization'] = `Token ${localStorage.getItem('token')}`;
 
                 // 调用用户详情 API（后端需返回当前登录用户信息，包含头像URL）
-                const response = await axios.get('http://localhost:8080/api/charging/user/' + localStorage.getItem('username')+'/', {
+                const response = await axios.get(backendbaseurl+'/api/charging/user/' + localStorage.getItem('username')+'/', {
                     headers: {
                         'Token': localStorage.getItem('token')
                     },

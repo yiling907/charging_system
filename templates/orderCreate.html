@@ -203,11 +203,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="base.js"></script>
+
 <script>
     const getChargerId = () => {
-        const params = window.location.pathname.split('/')
-        const id = params.filter(part => part).pop();
-        return id;
+        return getQueryVariable("charger_id");
     };
     axios.defaults.headers.common['Authorization'] = `Token ${localStorage.getItem('token')}`;
     let selectedPackageId = null; // 选中的套餐ID
@@ -233,7 +233,7 @@
         const token = localStorage.getItem('token');
         if (!token) {
             alert('请登录');
-            window.location.href = '/user/login';
+            window.location.href = backendbaseurl+'/user/login';
             return false;
         }
         return true;
@@ -262,7 +262,7 @@
             futureDate.setHours(now.getHours() + Number(selectedPackage.dataset.time));
 
             // 调用下单API
-            const response = await axios.post('/api/charging/records/', {
+            const response = await axios.post(backendbaseurl+'/api/charging/records/', {
                 start_time: formateTime(now),
                 end_time: formateTime(futureDate),
                 electricity: "220",
@@ -273,7 +273,7 @@
 
             // 下单成功
             alert('下单成功！即将跳转到订单列表');
-            window.location.href = `/records/`;
+            window.location.href =apigatewaybaseurl+ `chargerRecord.html`;
 
         } catch (err) {
             // 恢复按钮状态

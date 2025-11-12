@@ -272,6 +272,8 @@
     <span id="loadingText">加载中...</span>
 </div>
 
+<script src="base.js"></script>
+
 <script>
     // 全局变量
     let records = [];
@@ -281,7 +283,7 @@
     let totalPages = 0;
 
     // API基础地址
-    const API_BASE_URL = '/api/charging';
+    const API_BASE_URL = backendbaseurl+'/api/charging';
 
     // 状态样式映射
     const statusStyles = {

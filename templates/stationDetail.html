@@ -439,11 +439,14 @@
     </div>
 </div>
 
+<script src="base.js"></script>
+
+
 <script>
     
     async function loadApiKey() {
     try {
-      const response = await fetch('/api/v1/google_api_key', {
+      const response = await fetch(backendbaseurl+'/api/v1/google_api_key', {
           headers: { 'Token': localStorage.getItem('token') }
         });
       const { google_maps_api_key } = await response.json();
@@ -468,9 +471,7 @@
   }}
     // 获取URL中的站点ID
     const getStationId = () => {
-        const params = window.location.pathname.split('/')
-        const id = params.filter(part => part).pop();
-        return id;
+        return getQueryVariable("station_id");
     };
 
     const stationId = getStationId();
@@ -536,7 +537,7 @@
 
             const card = document.createElement('div');
             card.className = 'charger-card';
-            card.onclick = () => window.location.href = "/chargers/"+charger.id;
+            card.onclick = () => window.location.href = apigatewaybaseurl+"chargerDetail.html?charger_id="+charger.id;
 
             card.innerHTML = `
                     <div class="charger-header">
@@ -593,7 +594,7 @@
     const fetchStationDetail = async () => {
         try {
             // 替换为实际接口地址
-            const response = await fetch(`/api/charging/stations/${stationId}/?charger_status=idle`);
+            const response = await fetch(backendbaseurl+`/api/charging/stations/${stationId}/?charger_status=idle`);
             if (!response.ok) throw new Error('获取数据失败');
 
             const station = await response.json();

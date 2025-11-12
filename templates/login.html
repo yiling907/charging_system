@@ -65,6 +65,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="base.js"></script>
+
 <script>
     // 监听表单提交（阻止默认刷新）
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -72,7 +74,7 @@
         const errorMsg = document.getElementById('errorMsg');
         try {
             // 调用 Django 登录 API（需后端实现，示例路径）
-            const response = await axios.post("http://localhost:8080/api/charging/login/", {
+            const response = await axios.post(backendbaseurl + "/api/charging/login/", {
                 username: document.getElementById('username').value,
                 password: document.getElementById('password').value
             });

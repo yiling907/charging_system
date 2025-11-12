@@ -73,13 +73,15 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="base.js"></script>
+
 <script>
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const errorMsg = document.getElementById('errorMsg');
         try {
             // 调用注册 API（后端需实现用户创建逻辑）
-            const response = await axios.post("http://localhost:8080/api/charging/user/", {
+            const response = await axios.post(backendbaseurl+"/api/charging/user/", {
                 username: document.getElementById('username').value,
                 password: document.getElementById('password').value,
                 email: document.getElementById('email').value,

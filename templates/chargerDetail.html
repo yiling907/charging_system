@@ -373,13 +373,12 @@
 
 <!-- 提示框 -->
 <div class="toast" id="toast"></div>
+<script src="base.js"></script>
 
 <script>
     // 获取URL中的充电桩ID
     const getChargerId = () => {
-        const params = window.location.pathname.split('/')
-        const id = params.filter(part => part).pop();
-        return id;
+        return getQueryVariable("charger_id");
     };
 
     const chargerId = getChargerId();
@@ -444,9 +443,10 @@
 
     // 获取充电桩详情
     const fetchChargerDetail = async () => {
+
         try {
             // 替换为实际接口地址
-            const response = await fetch(`/api/charging/chargers/${chargerId}/`);
+            const response = await fetch(backendbaseurl+`/api/charging/chargers/${chargerId}/`);
             if (!response.ok) throw new Error('获取数据失败');
 
             const charger = await response.json();
@@ -502,11 +502,11 @@
     }
 
     async function handleCreateOrder() {
-        window.location.href = `/order_create/`+ chargerId;
+        window.location.href = apigatewaybaseurl+`orderCreate.html?charger_id=`+ chargerId;
     }
 
     function showHistory() {
-        window.location.href = `/records/`;
+        window.location.href = apigatewaybaseurl+`chargerRecord.html`;
     }
 
     // 初始化
