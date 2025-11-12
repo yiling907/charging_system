@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>充电口查询（Google Maps）</title>
-    <!-- 优先引入基础资源 -->
+    <title>Available Station</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
 
-    <!-- 简化 Tailwind 配置，确保兼容性 -->
+    
     <script>
         tailwind.config = {
             theme: {
@@ -22,7 +22,7 @@
         }
     </script>
 
-    <!-- 基础工具类，避免复杂语法 -->
+    
     <style type="text/tailwindcss">
         @layer utilities {
             .content-auto {
@@ -41,37 +41,37 @@
 </head>
 <body class="bg-gray-50 min-h-screen p-4 md:p-6">
 <div class="max-w-5xl mx-auto">
-    <!-- 页面标题 -->
+    
     <header class="mb-6">
         <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
-            <i class="fa fa-plug text-primary mr-2"></i>充电口查询
+            <i class="fa fa-plug text-primary mr-2"></i>Search for available stations
         </h1>
     </header>
 
-    <!-- 搜索区域 -->
+    
     <div class="mb-8">
         <div class="flex flex-col sm:flex-row gap-3">
             <input
                     type="text"
                     id="addressInput"
-                    placeholder="输入地址（如：北京市朝阳区）搜索最近的充电口"
+                    placeholder="Input station address to get the next available station"
                     class="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
             >
             <button id="searchBtn"
                     class="bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center">
-                <i class="fa fa-search mr-2"></i>搜索
+                <i class="fa fa-search mr-2"></i>search
             </button>
         </div>
     </div>
 
-    <!-- 结果标题 -->
+    
     <div id="resultTitle" class="text-lg font-semibold text-gray-800 mb-4">
-        所有可用充电口
+        available stations list
     </div>
 
-    <!-- 充电口列表容器 -->
+    
     <ul id="portList" class="space-y-4">
-        <!-- 列表内容由JS动态生成 -->
+        
     </ul>
 </div>
 
@@ -85,40 +85,37 @@
             const {google_maps_api_key} = await response.json();
             console.log(google_maps_api_key)
 
-            // 动态加载 SDK 并监听加载完成
+            
             const script = document.createElement('script');
             script.src = `https://maps.googleapis.com/maps/api/js?key=${google_maps_api_key}`;
             script.async = true;
             script.defer = true;
-            // 加载完成后初始化地图
-            script.onerror = () => console.error("Google Maps SDK 加载失败");
+            
+            script.onerror = () => console.error("Google Maps SDK load error");
             document.head.appendChild(script);
         } catch (err) {
-            console.error("获取 API Key 失败：", err);
+            console.error("rise error when get apikey", err);
         }
     }
 
-    // 全局变量
+    
     let allPorts = [];
     const portListEl = document.getElementById('portList');
     const resultTitleEl = document.getElementById('resultTitle');
     const addressInput = document.getElementById('addressInput');
     const searchBtn = document.getElementById('searchBtn');
 
-    // 页面加载初始化
+    
     window.onload = async () => {
         await loadApiKey();
         await fetchAllPorts();
         renderPorts(allPorts, false);
 
-        // 绑定事件
+        
         searchBtn.addEventListener('click', searchNearby);
         addressInput.addEventListener('keyup', (e) => e.key === 'Enter' && searchNearby());
     };
 
-    /**
-     * 获取充电口数据
-     */
     async function fetchAllPorts() {
         try {
             showLoading();
@@ -131,7 +128,7 @@
             portListEl.innerHTML = `
           <li class="card p-6 text-center">
             <i class="fa fa-exclamation-circle text-red-500 text-2xl mb-2"></i>
-            <p class="text-gray-600">数据加载失败，请刷新页面重试</p>
+            <p class="text-gray-600">error when loading data, refresh page please</p>
           </li>
         `;
         } finally {
@@ -139,13 +136,11 @@
         }
     }
 
-    /**
-     * 搜索附近充电口
-     */
+
     async function searchNearby() {
         const address = addressInput.value.trim();
         if (!address) {
-            alert('请输入地址');
+            alert('input address please');
             return;
         }
 
@@ -153,11 +148,11 @@
             showLoading();
             const {lat, lng} = await addressToLatLng(address);
             if (!lat || !lng) {
-                alert('地址解析失败，请检查地址格式');
+                alert('error address');
                 return;
             }
 
-            // 计算距离并排序
+            
             const portsWithDistance = allPorts.map(port => ({
                 ...port,
                 distance: calculateDistance(lat, lng, port.latitude, port.longitude)
@@ -169,33 +164,29 @@
             portListEl.innerHTML = `
           <li class="card p-6 text-center">
             <i class="fa fa-exclamation-circle text-red-500 text-2xl mb-2"></i>
-            <p class="text-gray-600">搜索失败，请重试</p>
+            <p class="text-gray-600">failed, retry please</p>
           </li>
         `;
         } finally {
             hideLoading();
         }
     }
-
-    /**
-     * 渲染充电口列表
-     */
     function renderPorts(stations, isSearchResult) {
         if (stations.length === 0) {
             portListEl.innerHTML = `
           <li class="card p-8 text-center">
             <i class="fa fa-map-marker text-gray-300 text-4xl mb-3"></i>
-            <p class="text-gray-700 font-medium">暂无可用充电口</p>
-            <p class="text-gray-500 text-sm mt-1">请尝试其他地址搜索</p>
+            <p class="text-gray-700 font-medium">no available station</p>
+            <p class="text-gray-500 text-sm mt-1">try other address please</p>
           </li>
         `;
-            resultTitleEl.textContent = isSearchResult ? '未找到匹配的充电口' : '所有可用充电口';
+            resultTitleEl.textContent = isSearchResult ? 'no available station' : 'available stations list';
             return;
         }
 
         resultTitleEl.textContent = isSearchResult
-            ? `附近可用充电口（共 ${stations.length} 个）`
-            : `所有可用充电口（共 ${stations.length} 个）`;
+            ? `available stations in total:${stations.length}`
+            : `available stations in total:${stations.length}`;
 
         portListEl.innerHTML = stations.map(station => `
         <li class="card card-hover">
@@ -213,13 +204,13 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
-              <div><i class="fa fa-plug text-gray-400 mr-1"></i>类型：${station.chargers_type}</div>
-              <div><i class="fa fa-clock-o text-gray-400 mr-1"></i>更新：${station.updated_at}</div>
-              <div><i class="fa fa-check-circle text-secondary mr-1"></i>可用：${station.avaliable_count}个</div>
+              <div><i class="fa fa-plug text-gray-400 mr-1"></i>charger type:${station.chargers_type}</div>
+              <div><i class="fa fa-clock-o text-gray-400 mr-1"></i>update at:${station.updated_at}</div>
+              <div><i class="fa fa-check-circle text-secondary mr-1"></i>available chargers in total:${station.avaliable_count}</div>
 
               ${isSearchResult ? `
                 <div class="md:col-span-3 mt-2 text-primary font-medium">
-                  <i class="fa fa-road mr-1"></i>距离：${station.distance.toFixed(1)}公里
+                  <i class="fa fa-road mr-1"></i>distance:${station.distance.toFixed(1)}km
                 </div>
               ` : ''}
             </div>
@@ -228,9 +219,6 @@
       `).join('');
     }
 
-    /**
-     * 地址转经纬度
-     */
     function addressToLatLng(address) {
         return new Promise((resolve, reject) => {
             const geocoder = new google.maps.Geocoder();
@@ -239,15 +227,12 @@
                     const loc = results[0].geometry.location;
                     resolve({lat: loc.lat(), lng: loc.lng()});
                 } else {
-                    reject('地址解析失败');
+                    reject('failed, retry please');
                 }
             });
         });
     }
 
-    /**
-     * 计算两点距离
-     */
     function calculateDistance(lat1, lon1, lat2, lon2) {
         const R = 6371;
         const dLat = toRadians(lat2 - lat1);
@@ -263,20 +248,17 @@
         return degrees * (Math.PI / 180);
     }
 
-    /**
-     * 加载状态
-     */
     function showLoading() {
         portListEl.innerHTML = `
         <li class="card p-6 text-center">
           <div class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mb-2"></div>
-          <p class="text-gray-600">加载中...</p>
+          <p class="text-gray-600">loading</p>
         </li>
       `;
     }
 
     function hideLoading() {
-        // 由后续渲染覆盖
+        
     }
 </script>
 </body>

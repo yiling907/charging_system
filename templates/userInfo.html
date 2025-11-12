@@ -1,14 +1,11 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>个人信息</title>
-    <!-- 引入 Tailwind CSS -->
+    <title>Personal Information</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome 图标 -->
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <!-- 自定义 Tailwind 配置 -->
     <script>
         tailwind.config = {
             theme: {
@@ -43,41 +40,33 @@
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen py-8">
-    <!-- 卡片容器 -->
     <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-        <!-- 卡片头部 -->
         <div class="bg-primary text-white p-6">
             <h2 class="text-2xl font-bold flex items-center">
-                <i class="fa fa-user-circle mr-2"></i>个人信息
+                <i class="fa fa-user-circle mr-2"></i>Personal Information
             </h2>
-            <p class="text-primary-100 mt-1">管理您的账户基本信息</p>
+            <p class="text-primary-100 mt-1">Manage your account basic information</p>
         </div>
 
-        <!-- 卡片内容 -->
         <div class="p-6 md:p-8">
-            <!-- 头像上传区域 -->
             <div class="flex flex-col md:flex-row items-start md:items-center mb-8 pb-8 border-b border-gray-100">
-                <span class="info-label mb-4 md:mb-0">用户头像：</span>
+                <span class="info-label mb-4 md:mb-0">Profile Picture:</span>
                 <div class="relative">
-                    <!-- 头像预览 -->
                     <div id="avatarPreview" class="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-100 avatar-hover cursor-pointer">
-                        <!-- 初始默认头像 -->
-                        <img src="https://picsum.photos/id/64/200/200" alt="用户头像" class="w-full h-full object-cover">
+                        <img src="https://picsum.photos/id/64/200/200" alt="Profile Picture" class="w-full h-full object-cover">
                     </div>
-                    <!-- 上传按钮（隐藏原生input） -->
                     <label for="avatarUpload" class="absolute bottom-0 right-0 bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center shadow-md cursor-pointer hover:bg-primary/90 transition-all">
                         <i class="fa fa-camera"></i>
                     </label>
                     <input type="file" id="avatarUpload" accept="image/*" class="hidden">
                 </div>
                 <p class="ml-0 md:ml-4 mt-2 text-sm text-gray-500">
-                    <i class="fa fa-info-circle mr-1"></i>支持 JPG、PNG 格式，建议尺寸 200x200px
+                    <i class="fa fa-info-circle mr-1"></i>Supports JPG, PNG formats, recommended size 200x200px
                 </p>
             </div>
 
-            <!-- 用户名 -->
             <div class="mb-6 pb-6 border-b border-gray-100">
-                <span class="info-label">用户名：</span>
+                <span class="info-label">Username:</span>
                 <input
                     type="text"
                     id="username"
@@ -86,9 +75,8 @@
                 >
             </div>
 
-            <!-- 邮箱 -->
             <div class="mb-6 pb-6 border-b border-gray-100">
-                <span class="info-label">邮箱：</span>
+                <span class="info-label">Email:</span>
                 <input
                     type="email"
                     id="email"
@@ -97,9 +85,8 @@
                 >
             </div>
 
-            <!-- 手机号 -->
             <div class="mb-6 pb-6 border-b border-gray-100">
-                <span class="info-label">手机号：</span>
+                <span class="info-label">Phone Number:</span>
                 <input
                     type="tel"
                     id="phone"
@@ -108,48 +95,44 @@
                 >
             </div>
 
-            <!-- 注册时间 -->
             <div class="mb-8">
-                <span class="info-label">注册时间：</span>
+                <span class="info-label">Registration Date:</span>
                 <span id="register_time" class="text-gray-600"></span>
             </div>
 
-            <!-- 操作按钮 -->
             <div class="flex flex-wrap gap-3 mb-8">
                 <button
                     id="editBtn"
                     class="btn bg-primary text-white hover:bg-primary/90 flex items-center"
                 >
-                    <i class="fa fa-pencil mr-2"></i>编辑信息
+                    <i class="fa fa-pencil mr-2"></i>Edit Information
                 </button>
                 <button
                     id="saveBtn"
                     class="btn bg-secondary text-white hover:bg-secondary/90 flex items-center hidden"
                 >
-                    <i class="fa fa-check mr-2"></i>保存修改
+                    <i class="fa fa-check mr-2"></i>Save Changes
                 </button>
-                <!-- 单独的头像上传确认按钮（可选，也可和信息保存合并） -->
                 <button
                     id="uploadAvatarBtn"
                     class="btn bg-blue-600 text-white hover:bg-blue-700 flex items-center hidden"
                 >
-                    <i class="fa fa-upload mr-2"></i>确认上传头像
+                    <i class="fa fa-upload mr-2"></i>Confirm Avatar Upload
                 </button>
             </div>
 
-            <!-- 底部链接 -->
             <div class="text-right text-gray-600 border-t border-gray-100 pt-6">
                 <a
                     href="{% url 'available_station' %}"
                     class="text-primary hover:text-primary/80 mr-4 transition-colors"
                 >
-                    <i class="fa fa-map-marker mr-1"></i>查看可用充电站
+                    <i class="fa fa-map-marker mr-1"></i>View Available Charging Stations
                 </a>
                 <a
                     href="javascript:logout()"
                     class="text-gray-500 hover:text-red-500 transition-colors"
                 >
-                    <i class="fa fa-sign-out mr-1"></i>退出登录
+                    <i class="fa fa-sign-out mr-1"></i>Logout
                 </a>
             </div>
         </div>
@@ -159,15 +142,12 @@
     <script src="base.js"></script>
 
     <script>
-        // 全局变量：存储选中的头像文件
         let selectedAvatarFile = null;
 
-        // 设置 axios 请求头（Token 认证）
         window.onload = async () => {
             try {
                 axios.defaults.headers.common['Authorization'] = `Token ${localStorage.getItem('token')}`;
 
-                // 调用用户详情 API（后端需返回当前登录用户信息，包含头像URL）
                 const response = await axios.get(backendbaseurl+'/api/charging/user/' + localStorage.getItem('username')+'/', {
                     headers: {
                         'Token': localStorage.getItem('token')
@@ -176,113 +156,90 @@
                 const user = response.data;
                 console.log(user)
 
-                // 填充信息到表单
                 document.getElementById('username').value = user.username;
-                document.getElementById('email').value = user.email || '未填写';
-                document.getElementById('phone').value = user.phone || '未填写';
-                document.getElementById('register_time').textContent = user.date_joined || '未知';
-
-                // 加载用户已有头像（如果后端返回 avatar 字段）
-                //if (user.avatar) {
-                  //  document.querySelector('#avatarPreview img').src = user.avatar;
-                //}
+                document.getElementById('email').value = user.email || 'Not filled';
+                document.getElementById('phone').value = user.phone || 'Not filled';
+                document.getElementById('register_time').textContent = user.date_joined || 'Unknown';
             } catch (err) {
-                // 未登录或 Token 失效，跳转登录页
-                alert('请先登录！');
+                alert('Please log in first!');
                 window.location.href = "{% url 'login' %}";
             }
         };
 
-        // 头像选择：预览功能
         document.getElementById('avatarUpload').addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
-            // 验证文件类型
             const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
             if (!allowedTypes.includes(file.type)) {
-                alert('请上传 JPG 或 PNG 格式的图片！');
+                alert('Please upload JPG or PNG format images!');
                 return;
             }
 
-            // 验证文件大小（限制 2MB）
             if (file.size > 2 * 1024 * 1024) {
-                alert('图片大小不能超过 2MB！');
+                alert('Image size cannot exceed 2MB!');
                 return;
             }
 
-            // 预览图片
             const reader = new FileReader();
             reader.onload = (readerEvent) => {
                 document.querySelector('#avatarPreview img').src = readerEvent.target.result;
             };
             reader.readAsDataURL(file);
 
-            // 存储选中的文件，用于后续上传
             selectedAvatarFile = file;
-
-            // 显示上传按钮
             document.getElementById('uploadAvatarBtn').classList.remove('hidden');
         });
 
-        // 头像上传：提交到后端
         document.getElementById('uploadAvatarBtn').addEventListener('click', async () => {
             if (!selectedAvatarFile) {
-                alert('请先选择要上传的头像！');
+                alert('Please select an avatar to upload first!');
                 return;
             }
 
             try {
-                // 构建 FormData（文件上传必须用 FormData 格式）
                 const formData = new FormData();
-                formData.append('avatar', selectedAvatarFile); // 字段名需和后端接口一致
+                formData.append('avatar', selectedAvatarFile);
 
-                // 上传头像（后端需提供头像上传接口）
                 await axios.patch(
-                    'http://localhost:8080/api/charging/user/' + localStorage.getItem('username')+'/',
+                    backendbaseurl+'/api/charging/user/' + localStorage.getItem('username')+'/',
                     formData,
                     {
                         headers: {
-                            'Content-Type': 'multipart/form-data', // 文件上传必须的请求头
+                            'Content-Type': 'multipart/form-data',
                             'Authorization': `Token ${localStorage.getItem('token')}`
                         }
                     }
                 );
 
-                alert('头像上传成功！');
-                // 隐藏上传按钮
+                alert('Avatar uploaded successfully!');
                 document.getElementById('uploadAvatarBtn').classList.add('hidden');
             } catch (err) {
-                alert('头像上传失败：' + (err.response?.data?.message || '服务器错误'));
+                alert('Avatar upload failed: ' + (err.response?.data?.message || 'Server error'));
             }
         });
 
-        // 编辑按钮：启用输入框
         document.getElementById('editBtn').addEventListener('click', () => {
             const emailInput = document.getElementById('email');
             const phoneInput = document.getElementById('phone');
 
-            // 启用输入框并修改样式
             emailInput.disabled = false;
             phoneInput.disabled = false;
             emailInput.classList.remove('bg-gray-50', 'cursor-not-allowed');
             phoneInput.classList.remove('bg-gray-50', 'cursor-not-allowed');
 
-            // 切换按钮显示
             document.getElementById('editBtn').classList.add('hidden');
             document.getElementById('saveBtn').classList.remove('hidden');
         });
 
-        // 保存按钮：提交信息修改
         document.getElementById('saveBtn').addEventListener('click', async () => {
             try {
-                await axios.patch('http://localhost:8080/api/charging/user/' + localStorage.getItem('username')+'/', {
+                await axios.patch(backendbaseurl+'/api/charging/user/' + localStorage.getItem('username')+'/', {
                     email: document.getElementById('email').value,
                     phone: document.getElementById('phone').value
                 });
-                alert('信息修改成功！');
+                alert('Information updated successfully!');
 
-                // 禁用输入框并恢复样式
                 const emailInput = document.getElementById('email');
                 const phoneInput = document.getElementById('phone');
                 emailInput.disabled = true;
@@ -290,15 +247,13 @@
                 emailInput.classList.add('bg-gray-50', 'cursor-not-allowed');
                 phoneInput.classList.add('bg-gray-50', 'cursor-not-allowed');
 
-                // 切换按钮显示
                 document.getElementById('editBtn').classList.remove('hidden');
                 document.getElementById('saveBtn').classList.add('hidden');
             } catch (err) {
-                alert('修改失败：' + (err.response?.data?.message || '服务器错误'));
+                alert('Update failed: ' + (err.response?.data?.message || 'Server error'));
             }
         });
 
-        // 退出登录：清除 Token 并跳转
         function logout() {
             localStorage.removeItem('token');
             window.location.href = "{% url 'login' %}";

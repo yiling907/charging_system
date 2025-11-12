@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>用户注册</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
     <style>
         .form-container {
             max-width: 400px;
@@ -46,28 +47,28 @@
 </head>
 <body>
 <div class="form-container">
-    <h2>用户注册</h2>
+    <h2>User Registration</h2>
     <div class="error" id="errorMsg"></div>
     <form id="registerForm">
         <div class="form-group">
-            <label for="username">用户名</label>
+            <label for="username">Username</label>
             <input type="text" id="username" name="username" required>
         </div>
         <div class="form-group">
-            <label for="password">密码</label>
+            <label for="password">Password</label>
             <input type="password" id="password" name="password" required>
         </div>
         <div class="form-group">
-            <label for="email">邮箱</label>
+            <label for="email">Email</label>
             <input type="email" id="email" name="email" required>
         </div>
         <div class="form-group">
-            <label for="phone">手机号（可选）</label>
+            <label for="phone">Phone Number (Optional)</label>
             <input type="tel" id="phone" name="phone">
         </div>
-        <button type="submit">注册</button>
+        <button type="submit">Register</button>
         <p style="margin-top:15px; text-align:center;">
-            已有账号？<a href="{% url 'login' %}">去登录</a>
+            Already have an account? <a href="{% url 'login' %}">Go to login</a>
         </p>
     </form>
 </div>
@@ -80,20 +81,18 @@
         e.preventDefault();
         const errorMsg = document.getElementById('errorMsg');
         try {
-            // 调用注册 API（后端需实现用户创建逻辑）
             const response = await axios.post(backendbaseurl+"/api/charging/user/", {
                 username: document.getElementById('username').value,
                 password: document.getElementById('password').value,
                 email: document.getElementById('email').value,
                 phone: document.getElementById('phone').value
             });
-            // 注册成功跳转登录页
-            alert('注册成功！');
+            alert('Registration successful!');
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('username', response.data.user.username)
             window.location.href = "{% url 'login' %}";
         } catch (err) {
-            errorMsg.textContent = err.response?.data?.message || '注册失败（用户名可能已存在）';
+            errorMsg.textContent = err.response?.data?.message || 'Registration failed (username may already exist)';
         }
     });
 </script>

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>充电桩详情</title>
+    <title>Charger Detail</title>
     <style>
         * {
             margin: 0;
@@ -269,132 +269,122 @@
 <body>
 <div class="container">
     <header>
-        <button class="back-btn" onclick="history.back()">← 返回</button>
-        <h1>充电桩详情</h1>
-        <div></div> <!-- 占位元素，保持标题居中 -->
+        <button class="back-btn" onclick="history.back()">← back</button>
+        <h1>Station Detail</h1>
+        <div></div>
     </header>
 
-    <!-- 状态卡片 -->
     <div class="status-card">
         <div class="status-header">
-            <div class="status-tag" id="statusTag">加载中...</div>
+            <div class="status-tag" id="statusTag">loading...</div>
             <div class="id-tag" id="chargerId">ID: --</div>
         </div>
         <div class="basic-info">
             <div class="info-item">
                 <i>🔋</i>
-                <span id="chargerType">类型: 未知</span>
+                <span id="chargerType">type: unknow</span>
             </div>
             <div class="info-item">
                 <i>⚡</i>
-                <span id="chargerPower">功率: 未知</span>
+                <span id="chargerPower">power: unknow</span>
             </div>
             <div class="info-item">
                 <i>🕒</i>
-                <span id="updateTime">更新时间: 未知</span>
+                <span id="updateTime">update time: unknow</span>
             </div>
         </div>
     </div>
 
-    <!-- 所属站点信息 -->
     <div class="section">
-        <div class="section-title">所属站点</div>
+        <div class="section-title">Belonging site</div>
         <div class="section-content">
             <div class="link-cell" id="stationName" onclick="goToStation()">
-                加载中...
+                loading...
             </div>
             <div class="cell">
-                <span class="cell-label">站点桩数</span>
+                <span class="cell-label">chargers in total</span>
                 <span class="cell-value" id="stationChargers">--</span>
             </div>
             <div class="link-cell" onclick="openMap()">
-                导航到站点
+                direct to station
             </div>
         </div>
     </div>
 
-    <!-- 收费标准 -->
     <div class="section">
-        <div class="section-title">收费标准</div>
+        <div class="section-title">Charger Standard</div>
         <div class="section-content">
             <div class="cell">
-                <span class="cell-label">接口类型</span>
-                <span class="cell-value" id="interfaceType">未知</span>
+                <span class="cell-label">Type</span>
+                <span class="cell-value" id="interfaceType1">unknown</span>
             </div>
             <div class="cell">
-                <span class="cell-label">支持车型</span>
-                <span class="cell-value" id="supportedModels">未知</span>
+                <span class="cell-label">Supported Models</span>
+                <span class="cell-value" id="supportedModels1">unknown</span>
             </div>
             <div class="cell">
-                <span class="cell-label">上线时间</span>
-                <span class="cell-value" id="onlineTime">未知</span>
+                <span class="cell-label">Online Time</span>
+                <span class="cell-value" id="onlineTime1">unknown</span>
             </div>
         </div>
     </div>
 
-    <!-- 技术参数 -->
     <div class="section">
-        <div class="section-title">技术参数</div>
+        <div class="section-title">Technical Parameters</div>
         <div class="section-content">
             <div class="cell">
-                <span class="cell-label">接口类型</span>
-                <span class="cell-value" id="interfaceType">未知</span>
+                <span class="cell-label">Interface Type</span>
+                <span class="cell-value" id="interfaceType2">unknown</span>
             </div>
             <div class="cell">
-                <span class="cell-label">支持车型</span>
-                <span class="cell-value" id="supportedModels">未知</span>
+                <span class="cell-label">Supported Models</span>
+                <span class="cell-value" id="supportedModels2">unknown</span>
             </div>
             <div class="cell">
-                <span class="cell-label">上线时间</span>
-                <span class="cell-value" id="onlineTime">未知</span>
+                <span class="cell-label">Online Time</span>
+                <span class="cell-value" id="onlineTime2">unknown</span>
             </div>
         </div>
     </div>
 
-    <!-- 操作按钮 -->
     <div class="action-buttons">
         <button class="btn btn-primary" id="reserveBtn" onclick="handleCreateOrder()">
-            充电
+            Charge
         </button>
         <button class="btn btn-info" onclick="showHistory()">
-            查看充电记录
+            View Charging Records
         </button>
     </div>
 </div>
 
-<!-- 弹窗 -->
 <div class="dialog-mask" id="dialogMask">
     <div class="dialog">
         <div class="dialog-title" id="dialogTitle"></div>
         <div class="dialog-message" id="dialogMessage"></div>
-        <button class="dialog-btn" onclick="hideDialog()">确定</button>
+        <button class="dialog-btn" onclick="hideDialog()">Confirm</button>
     </div>
 </div>
 
-<!-- 提示框 -->
 <div class="toast" id="toast"></div>
 <script src="base.js"></script>
 
 <script>
-    // 获取URL中的充电桩ID
     const getChargerId = () => {
         return getQueryVariable("charger_id");
     };
 
     const chargerId = getChargerId();
     if (!chargerId) {
-        showToast('未找到充电桩ID');
+        showToast('Charger ID not found');
         setTimeout(() => history.back(), 1500);
     }
 
-    // 状态配置
     const statusConfig = {
-        idle: {text: '空闲中', class: 'status-idle'},
-        charging: {text: '充电中', class: 'status-charging'},
-        fault: {text: '故障', class: 'status-fault'}
+        idle: {text: 'Idle', class: 'status-idle'},
+        charging: {text: 'Charging', class: 'status-charging'},
+        fault: {text: 'Fault', class: 'status-fault'}
     };
 
-    // DOM元素
     const elements = {
         statusTag: document.getElementById('statusTag'),
         chargerId: document.getElementById('chargerId'),
@@ -403,9 +393,12 @@
         updateTime: document.getElementById('updateTime'),
         stationName: document.getElementById('stationName'),
         stationChargers: document.getElementById('stationChargers'),
-        interfaceType: document.getElementById('interfaceType'),
-        supportedModels: document.getElementById('supportedModels'),
-        onlineTime: document.getElementById('onlineTime'),
+        interfaceType1: document.getElementById('interfaceType1'),
+        supportedModels1: document.getElementById('supportedModels1'),
+        onlineTime1: document.getElementById('onlineTime1'),
+        interfaceType2: document.getElementById('interfaceType2'),
+        supportedModels2: document.getElementById('supportedModels2'),
+        onlineTime2: document.getElementById('onlineTime2'),
         reserveBtn: document.getElementById('reserveBtn'),
         dialogMask: document.getElementById('dialogMask'),
         dialogTitle: document.getElementById('dialogTitle'),
@@ -413,14 +406,12 @@
         toast: document.getElementById('toast')
     };
 
-    // 时间格式化
     const formatTime = (timeStr) => {
-        if (!timeStr) return '未知时间';
+        if (!timeStr) return 'Unknown Time';
         const date = new Date(timeStr);
         return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
     };
 
-    // 显示提示框
     function showToast(message, duration = 2000) {
         elements.toast.textContent = message;
         elements.toast.classList.add('show');
@@ -429,90 +420,82 @@
         }, duration);
     }
 
-    // 显示弹窗
     function showDialog(title, message) {
         elements.dialogTitle.textContent = title;
         elements.dialogMessage.textContent = message;
         elements.dialogMask.classList.add('show');
     }
 
-    // 隐藏弹窗
     function hideDialog() {
         elements.dialogMask.classList.remove('show');
     }
 
-    // 获取充电桩详情
     const fetchChargerDetail = async () => {
-
         try {
-            // 替换为实际接口地址
-            const response = await fetch(backendbaseurl+`/api/charging/chargers/${chargerId}/`);
-            if (!response.ok) throw new Error('获取数据失败');
+            const response = await fetch(backendbaseurl + `/api/charging/chargers/${chargerId}/`);
+            if (!response.ok) throw new Error('Failed to fetch data');
 
             const charger = await response.json();
             renderChargerDetail(charger);
         } catch (error) {
-            showToast('加载失败: ' + error.message);
+            showToast('Loading failed: ' + error.message);
             console.error(error);
         }
     };
     var stationId;
-    // 渲染页面数据
+
     const renderChargerDetail = (charger) => {
-        // 状态渲染
         const status = charger.status || 'unknown';
-        const statusInfo = statusConfig[status] || {text: '未知状态', class: ''};
+        const statusInfo = statusConfig[status] || {text: 'Unknown Status', class: ''};
         elements.statusTag.textContent = statusInfo.text;
         elements.statusTag.className = `status-tag ${statusInfo.class}`;
 
-        // 基础信息
         elements.chargerId.textContent = `ID: ${charger.id || '--'}`;
-        elements.chargerType.textContent = `类型: ${charger.charger_type || '未知'}`;
-        elements.chargerPower.textContent = `功率: ${charger.power || '未知'} kW`;
-        elements.updateTime.textContent = `更新时间: ${formatTime(charger.updated_at)}`;
+        elements.chargerType.textContent = `Type: ${charger.charger_type || 'Unknown'}`;
+        elements.chargerPower.textContent = `Power: ${charger.power || 'Unknown'} kW`;
+        elements.updateTime.textContent = `Update Time: ${formatTime(charger.updated_at)}`;
 
-        // 站点信息
         const station = charger.station_info || {};
-        elements.stationName.textContent = station.station_name || '未知站点';
-        elements.stationChargers.textContent = `总${station.charger_count || 0}个 | 可用${station.active_charger_count || 0}个`;
+        elements.stationName.textContent = station.station_name || 'Unknown Station';
+        elements.stationChargers.textContent = `Total ${station.charger_count || 0} | Available ${station.active_charger_count || 0}`;
         stationId = charger.station
-        // 技术参数
-        elements.interfaceType.textContent = charger.charger_type || '未知';
-        elements.supportedModels.textContent = charger.supported_models || '全车型兼容';
-        elements.onlineTime.textContent = formatTime(charger.created_at);
 
-        // 预约按钮状态
+        elements.interfaceType1.textContent = charger.charger_type || 'Unknown';
+        elements.supportedModels1.textContent = charger.supported_models || 'Compatible with all models';
+        elements.onlineTime1.textContent = formatTime(charger.created_at);
+
+        elements.interfaceType2.textContent = charger.charger_type || 'Unknown';
+        elements.supportedModels2.textContent = charger.supported_models || 'Compatible with all models';
+        elements.onlineTime2.textContent = formatTime(charger.created_at);
+
         elements.reserveBtn.disabled = status !== 'idle';
-        elements.reserveBtn.textContent = status === 'idle' ? '充电' : '当前已经被占用';
+        elements.reserveBtn.textContent = status === 'idle' ? 'Charge' : 'Currently in use';
     };
 
-    // 事件处理函数
     function goToStation() {
         console.log(stationId)
         if (stationId) {
             window.location.href = "/stations/" + stationId;
         } else {
-            showToast('站点信息不存在');
+            showToast('Station information does not exist');
         }
     }
 
     function openMap() {
         const station = document.querySelector('.link-cell').textContent;
-        showDialog('导航提示', `即将打开地图导航至: ${station}`);
+        showDialog('Navigation Prompt', `About to open map navigation to: ${station}`);
     }
 
     async function handleCreateOrder() {
-        window.location.href = apigatewaybaseurl+`orderCreate.html?charger_id=`+ chargerId;
+        window.location.href = apigatewaybaseurl + `orderCreate.html?charger_id=` + chargerId;
     }
 
     function showHistory() {
-        window.location.href = apigatewaybaseurl+`chargerRecord.html`;
+        window.location.href = apigatewaybaseurl + `chargerRecord.html`;
     }
 
-    // 初始化
     window.onload = () => {
         fetchChargerDetail();
-        // 定时刷新数据（30秒一次）
         setInterval(fetchChargerDetail, 30000);
     };
 </script>

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>充电站详情</title>
+    <title>Charging Station Details</title>
     <style>
         * {
             margin: 0;
@@ -24,7 +24,6 @@
             padding: 0 16px;
         }
 
-        /* 头部导航 */
         .header {
             background-color: white;
             padding: 16px 0;
@@ -54,7 +53,6 @@
             font-weight: 600;
         }
 
-        /* 基本信息卡片 */
         .station-card {
             background: white;
             border-radius: 12px;
@@ -135,7 +133,6 @@
             color: #333;
         }
 
-        /* 充电桩列表 */
         .section-title {
             font-size: 17px;
             font-weight: 600;
@@ -218,7 +215,6 @@
             text-align: right;
         }
 
-        /* 设施与服务 */
         .amenities {
             background: white;
             border-radius: 12px;
@@ -257,7 +253,6 @@
             color: #666;
         }
 
-        /* 地图容器 */
         .map-container {
             width: 100%;
             height: 200px;
@@ -283,7 +278,6 @@
             font-size: 24px;
         }
 
-        /* 弹窗样式 */
         .dialog-mask {
             position: fixed;
             top: 0;
@@ -337,7 +331,6 @@
             cursor: pointer;
         }
 
-        /* 响应式调整 */
         @media (max-width: 768px) {
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -350,92 +343,85 @@
     </style>
 </head>
 <body>
-<!-- 头部导航 -->
 <div class="header">
     <div class="container header-content">
         <button class="back-btn" onclick="history.back()">←</button>
-        <h1 class="page-title">充电站详情</h1>
-        <div></div> <!-- 占位元素 -->
+        <h1 class="page-title">Charging Station Details</h1>
+        <div></div>
     </div>
 </div>
 
 <div class="container">
-    <!-- 充电站基本信息 -->
     <div class="station-card">
-        <h2 class="station-name" id="stationName">加载中...</h2>
+        <h2 class="station-name" id="stationName">Loading...</h2>
 
         <div class="station-address">
             <i>📍</i>
-            <span id="stationAddress">加载中...</span>
+            <span id="stationAddress">Loading...</span>
         </div>
 
         <div class="stats-grid">
             <div class="stat-item">
                 <div class="stat-value" id="totalChargers">0</div>
-                <div class="stat-label">总充电桩</div>
+                <div class="stat-label">Total Chargers</div>
             </div>
             <div class="stat-item">
                 <div class="stat-value" id="availableChargers">0</div>
-                <div class="stat-label">可用充电桩</div>
+                <div class="stat-label">Available Chargers</div>
             </div>
             <div class="stat-item">
                 <div class="stat-value" id="chargingRate">0%</div>
-                <div class="stat-label">占用率</div>
+                <div class="stat-label">Occupancy Rate</div>
             </div>
             <div class="stat-item">
                 <div class="stat-value" id="openStatus">--</div>
-                <div class="stat-label">营业状态</div>
+                <div class="stat-label">Operating Status</div>
             </div>
         </div>
 
         <div id="map" class="map-container">
             <div class="map-placeholder" onclick="openMap()">
                 <i>🗺️</i>
-                <span>点击查看地图位置</span>
+                <span>Click to view map location</span>
             </div>
         </div>
 
         <div class="action-buttons">
             <button class="btn btn-primary" onclick="navigateToStation()" id="b1">
-                <i>🧭</i> 导航前往
+                <i>🧭</i> Navigate
             </button>
             <button class="btn btn-secondary" onclick="showShare()">
-                <i>🔗</i> 分享站点
+                <i>🔗</i> Share Station
             </button>
         </div>
     </div>
 
-    <!-- 充电桩列表 -->
     <h3 class="section-title">
-        <i>🔌</i> 充电桩列表
+        <i>🔌</i> Charger List
     </h3>
     <div class="charger-list" id="chargerList">
-        <!-- 充电桩卡片将通过JS动态生成 -->
         <div class="charger-card">
             <div class="charger-header">
-                <span class="charger-id">加载中...</span>
+                <span class="charger-id">Loading...</span>
                 <span class="status-badge">--</span>
             </div>
         </div>
     </div>
 
-    <!-- 设施与服务 -->
     <div class="amenities">
         <h3 class="section-title">
-            <i>🎁</i> 设施与服务
+            <i>🎁</i> Facilities & Services
         </h3>
         <div class="amenities-grid" id="amenitiesGrid">
-            <!-- 设施项将通过JS动态生成 -->
         </div>
     </div>
 </div>
 
-<!-- 弹窗 -->
 <div class="dialog-mask" id="dialogMask">
     <div class="dialog">
         <div class="dialog-title" id="dialogTitle"></div>
         <div class="dialog-message" id="dialogMessage"></div>
-        <button class="dialog-btn" onclick="hideDialog()">确定</button>
+        <button class="dialog-btn" onclick="hideDialog()">Confirm</button>
     </div>
 </div>
 
@@ -443,43 +429,40 @@
 
 
 <script>
-    
     async function loadApiKey() {
-    try {
-      const response = await fetch(backendbaseurl+'/api/v1/google_api_key', {
-          headers: { 'Token': localStorage.getItem('token') }
-        });
-      const { google_maps_api_key } = await response.json();
-      console.log(google_maps_api_key)
+        try {
+            const response = await fetch(backendbaseurl + '/api/v1/google_api_key', {
+                headers: { 'Token': localStorage.getItem('token') }
+            });
+            const { google_maps_api_key } = await response.json();
+            console.log(google_maps_api_key)
 
-      if (window.google && window.google.maps) {
-      initMap();  // 已加载则直接初始化
-      return;
+            if (window.google && window.google.maps) {
+                initMap();
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${google_maps_api_key}`;
+            script.async = true;
+            script.defer = true;
+            script.onload = initMap;
+            script.onerror = () => console.error("Google Maps SDK failed to load");
+            document.head.appendChild(script);
+        } catch (err) {
+            console.error("Failed to get API Key: ", err);
+        }
     }
 
-    // 动态加载 SDK 并监听加载完成
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${google_maps_api_key}`;
-    script.async = true;
-    script.defer = true;
-    // 加载完成后初始化地图
-    script.onload = initMap;
-    script.onerror = () => console.error("Google Maps SDK 加载失败");
-    document.head.appendChild(script);
-  }catch (err) {
-    console.error("获取 API Key 失败：", err);
-  }}
-    // 获取URL中的站点ID
     const getStationId = () => {
         return getQueryVariable("station_id");
     };
 
     const stationId = getStationId();
     if (!stationId) {
-        showDialog('错误', '未找到站点ID', () => history.back());
+        showDialog('Error', 'Station ID not found', () => history.back());
     }
 
-    // DOM元素
     const elements = {
         stationName: document.getElementById('stationName'),
         stationAddress: document.getElementById('stationAddress'),
@@ -494,31 +477,27 @@
         dialogMessage: document.getElementById('dialogMessage')
     };
 
-    // 显示弹窗
     function showDialog(title, message) {
         elements.dialogTitle.textContent = title;
         elements.dialogMessage.textContent = message;
         elements.dialogMask.classList.add('show');
     }
 
-    // 隐藏弹窗
     function hideDialog() {
         elements.dialogMask.classList.remove('show');
     }
 
-    // 格式化占用率
     const formatRate = (available, total) => {
         if (total === 0) return '0%';
         const used = total - available;
         return `${Math.round((used / total) * 100)}%`;
     };
 
-    // 生成充电桩卡片
     const renderChargers = (chargers) => {
         elements.chargerList.innerHTML = '';
 
         if (chargers.length === 0) {
-            elements.chargerList.innerHTML = '<p style="text-align:center;padding:20px;">暂无充电桩信息</p>';
+            elements.chargerList.innerHTML = '<p style="text-align:center;padding:20px;">No charger information available</p>';
             return;
         }
 
@@ -530,36 +509,35 @@
             }[charger.status] || 'status-fault';
 
             const statusText = {
-                'idle': '空闲',
-                'charging': '充电中',
-                'fault': '故障'
-            }[charger.status] || '未知';
+                'idle': 'Idle',
+                'charging': 'Charging',
+                'fault': 'Fault'
+            }[charger.status] || 'Unknown';
 
             const card = document.createElement('div');
             card.className = 'charger-card';
-            card.onclick = () => window.location.href = apigatewaybaseurl+"chargerDetail.html?charger_id="+charger.id;
+            card.onclick = () => window.location.href = apigatewaybaseurl + "chargerDetail.html?charger_id=" + charger.id;
 
             card.innerHTML = `
                     <div class="charger-header">
-                        <span class="charger-id">充电桩 ${charger.id}</span>
+                        <span class="charger-id">Charger ${charger.id}</span>
                         <span class="status-badge ${statusClass}">${statusText}</span>
                     </div>
                     <div class="charger-info">
-                        <span>类型: ${charger.charger_type || '未知'}</span>
-                        <span>功率: ${charger.power || '未知'}kW</span>
+                        <span>Type: ${charger.charger_type || 'Unknown'}</span>
+                        <span>Power: ${charger.power || 'Unknown'}kW</span>
                     </div>
                     <div class="charger-info">
-                        <span>接口: ${charger.firmware_version || '未知'}</span>
-                        <span>更新: ${formatTime(charger.updated_at)}</span>
+                        <span>Interface: ${charger.firmware_version || 'Unknown'}</span>
+                        <span>Updated: ${formatTime(charger.updated_at)}</span>
                     </div>
-                    <div class="view-details">查看详情 →</div>
+                    <div class="view-details">View details →</div>
                 `;
 
             elements.chargerList.appendChild(card);
         });
     };
 
-    // 生成设施列表
     const renderAmenities = (amenities) => {
         const amenityIcons = {
             'restroom': '🚻',
@@ -583,83 +561,74 @@
         });
     };
 
-    // 时间格式化
     function formatTime(timeStr) {
-        if (!timeStr) return '未知';
+        if (!timeStr) return 'Unknown';
         const date = new Date(timeStr);
         return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
     }
 
-    // 获取站点详情数据
     const fetchStationDetail = async () => {
         try {
-            // 替换为实际接口地址
-            const response = await fetch(backendbaseurl+`/api/charging/stations/${stationId}/?charger_status=idle`);
-            if (!response.ok) throw new Error('获取数据失败');
+            const response = await fetch(backendbaseurl + `/api/charging/stations/${stationId}/?charger_status=idle`);
+            if (!response.ok) throw new Error('Failed to fetch data');
 
             const station = await response.json();
             console.log(station)
             renderStationDetail(station);
         } catch (error) {
-            showDialog('加载失败', error.message);
+            showDialog('Loading Failed', error.message);
             console.error(error);
         }
     };
+
     var stationLatitude;
     var stationLongitude;
 
-    // 渲染站点详情
     const renderStationDetail = (station) => {
-        // 基本信息
-        elements.stationName.textContent = station.name || '未知站点';
-        elements.stationAddress.textContent = station.address || '未知地址';
+        elements.stationName.textContent = station.name || 'Unknown Station';
+        elements.stationAddress.textContent = station.address || 'Unknown Address';
         stationLatitude = station.latitude;
         stationLongitude = station.longitude;
 
-        // 统计数据
         const total = station.count || 0;
         const available = station.avaliable_count || 0;
         elements.totalChargers.textContent = total;
         elements.availableChargers.textContent = available;
         elements.chargingRate.textContent = formatRate(available, total);
-        elements.openStatus.textContent = station.is_active ? '营业中' : '已关闭';
+        elements.openStatus.textContent = station.is_active ? 'Open' : 'Closed';
 
-        // 渲染充电桩列表
         renderChargers(station.chargers || []);
 
-        // 渲染设施列表
         renderAmenities(station.amenities || [
-            {code: 'restroom', name: '卫生间'},
-            {code: 'parking', name: '停车场'},
-            {code: 'wifi', name: '免费WiFi'},
-            {code: '24h', name: '24小时营业'}
+            { code: 'restroom', name: 'Restroom' },
+            { code: 'parking', name: 'Parking' },
+            { code: 'wifi', name: 'Free WiFi' },
+            { code: '24h', name: '24h Open' }
         ]);
     };
 
-    // 事件处理函数
     function openMap() {
         const address = elements.stationAddress.textContent;
-        showDialog('地图位置', `站点地址: ${address}\n点击确定打开地图`);
+        showDialog('Map Location', `Station address: ${address}\nClick confirm to open map`);
     }
 
     function navigateToStation() {
         const address = elements.stationAddress.textContent;
-        showDialog('导航提示', `即将打开地图导航至:\n${address}`);
+        showDialog('Navigation', `Opening navigation to:\n${address}`);
         calculateAndDisplayRoute(directionsService, directionsRenderer, start);
     }
 
     function showShare() {
-        showDialog('分享站点', '已复制站点链接到剪贴板');
+        showDialog('Share Station', 'Station link copied to clipboard');
         navigator.clipboard.writeText(elements.stationAddress.textContent);
     }
 
-    // 初始化
     window.onload = async () => {
         loadApiKey();
         fetchStationDetail();
-        // 定时刷新数据（1分钟一次）
         setInterval(fetchStationDetail, 60000);
     };
+
     var directionsService;
     var directionsRenderer;
     var start;
@@ -676,9 +645,9 @@
                 center: end,
             });
             new google.maps.Marker({
-                position: end, // 与地图中心点一致
-                map: map, // 绑定到地图
-                title: elements.stationName, // 鼠标悬停时显示的文字
+                position: end,
+                map: map,
+                title: elements.stationName,
             })
             directionsRenderer.setMap(map);
 

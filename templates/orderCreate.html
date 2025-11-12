@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>创建订单</title>
+    <title>Create Order</title>
     <style>
-        /* 基础样式重置 */
         * {
             margin: 0;
             padding: 0;
@@ -19,7 +18,6 @@
             min-height: 100vh;
         }
 
-        /* 容器样式 */
         .order-container {
             max-width: 800px;
             margin: 0 auto;
@@ -29,7 +27,6 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
-        /* 标题栏 */
         .order-header {
             background-color: #165DFF;
             color: white;
@@ -53,12 +50,10 @@
             font-size: 14px;
         }
 
-        /* 内容区域 */
         .order-content {
             padding: 25px;
         }
 
-        /* 套餐列表 */
         .package-list {
             display: grid;
             grid-template-columns: 1fr;
@@ -126,7 +121,6 @@
             margin-top: 15px;
         }
 
-        /* 按钮样式 */
         .order-btn {
             width: 100%;
             padding: 14px;
@@ -169,36 +163,33 @@
 </head>
 <body>
 <div class="order-container">
-    <!-- 标题栏 -->
     <div class="order-header">
-        <h2>选择充电套餐并下单</h2>
-        <p>根据您的需求选择合适的充电时长</p>
+        <h2>Select Charging Package and Create Order</h2>
+        <p>Choose the appropriate charging duration based on your needs</p>
     </div>
 
-    <!-- 内容区域 -->
     <div class="order-content">
         <div class="package-list">
-            <!-- 套餐选项：点击选中 -->
             <div class="package-item" data-id="1" data-time="1" data-price="10">
-                <div class="package-title">1小时快充</div>
-                <div>充电时长：1小时</div>
-                <div>适用场景：紧急补电</div>
+                <div class="package-title">1-Hour Fast Charge</div>
+                <div>Charging Duration: 1 Hour</div>
+                <div>Applicable Scenario: Emergency Charging</div>
                 <div class="package-price">¥10</div>
             </div>
             <div class="package-item" data-id="2" data-time="3" data-price="20">
-                <div class="package-title">3小时慢充</div>
-                <div>充电时长：3小时</div>
-                <div>适用场景：日常充电</div>
+                <div class="package-title">3-Hour Slow Charge</div>
+                <div>Charging Duration: 3 Hours</div>
+                <div>Applicable Scenario: Daily Charging</div>
                 <div class="package-price">¥20</div>
             </div>
             <div class="package-item" data-id="3" data-time="24" data-price="50">
-                <div class="package-title">全天套餐</div>
-                <div>充电时长：24小时</div>
-                <div>适用场景：长时间停放</div>
+                <div class="package-title">All-Day Package</div>
+                <div>Charging Duration: 24 Hours</div>
+                <div>Applicable Scenario: Long-Term Parking</div>
                 <div class="package-price">¥50</div>
             </div>
         </div>
-        <button id="createOrderBtn" class="order-btn" disabled>确认下单</button>
+        <button id="createOrderBtn" class="order-btn" disabled>Confirm Order</button>
     </div>
 </div>
 
@@ -210,83 +201,72 @@
         return getQueryVariable("charger_id");
     };
     axios.defaults.headers.common['Authorization'] = `Token ${localStorage.getItem('token')}`;
-    let selectedPackageId = null; // 选中的套餐ID
+    let selectedPackageId = null;
 
-    // 监听套餐选择
     document.querySelectorAll('.package-item').forEach(item => {
         item.addEventListener('click', () => {
-            // 移除其他选中状态，添加当前选中
             document.querySelectorAll('.package-item').forEach(i => i.classList.remove('active'));
             item.classList.add('active');
-            // 记录选中的套餐信息
             selectedPackageId = item.dataset.id;
-            // 启用下单按钮
             document.getElementById('createOrderBtn').disabled = false;
         });
     });
 
-    function formateTime(date) {
+    function formatTime(date) {
         return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
     }
 
     function isLoggedIn() {
         const token = localStorage.getItem('token');
         if (!token) {
-            alert('请登录');
+            alert('Please log in');
             window.location.href = backendbaseurl+'/user/login';
             return false;
         }
         return true;
     }
 
-    // 下单按钮：提交订单
     document.getElementById('createOrderBtn').addEventListener('click', async () => {
         if (!isLoggedIn()) return;
 
         const selectedPackage = document.querySelector(`.package-item[data-id="${selectedPackageId}"]`);
         if (!selectedPackage) {
-            alert('请选择充电套餐');
+            alert('Please select a charging package');
             return;
         }
 
         try {
-            // 禁用按钮防止重复提交
             const orderBtn = document.getElementById('createOrderBtn');
             orderBtn.disabled = true;
             orderBtn.classList.add('loading');
-            orderBtn.textContent = '提交中...';
+            orderBtn.textContent = 'Submitting...';
 
-            // 计算时间
             const now = new Date();
             let futureDate = new Date(now);
             futureDate.setHours(now.getHours() + Number(selectedPackage.dataset.time));
 
-            // 调用下单API
             const response = await axios.post(backendbaseurl+'/api/charging/records/', {
-                start_time: formateTime(now),
-                end_time: formateTime(futureDate),
+                start_time: formatTime(now),
+                end_time: formatTime(futureDate),
                 electricity: "220",
                 charger: getChargerId(),
                 fee: Number(selectedPackage.dataset.price),
                 user: localStorage.getItem('userId')
             });
 
-            // 下单成功
-            alert('下单成功！即将跳转到订单列表');
-            window.location.href =apigatewaybaseurl+ `chargerRecord.html`;
+            alert('Order created successfully! Redirecting to order list soon');
+            window.location.href = apigatewaybaseurl+ `chargerRecord.html`;
 
         } catch (err) {
-            // 恢复按钮状态
             const orderBtn = document.getElementById('createOrderBtn');
             orderBtn.disabled = false;
             orderBtn.classList.remove('loading');
-            orderBtn.textContent = '确认下单';
+            orderBtn.textContent = 'Confirm Order';
 
-            // 错误提示
             const errorMsg = err.response?.data?.error ||
                             err.response?.data?.message ||
-                            '下单失败，请重试';
-            alert('下单失败：' + errorMsg);
+                            'Failed to create order, please try again';
+            alert('Order creation failed: ' + errorMsg);
         }
     });
 </script>
