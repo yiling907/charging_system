@@ -115,6 +115,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'charging_system.wsgi.application'
 
+if 'RDS_HOSTNAME' in os.environ:
+    FORCE_SCRIPT_NAME = '/dev/backend'
+
 # 数据库配置
 DATABASES = {
     'default': {
