@@ -110,7 +110,6 @@ charger_status = openapi.Parameter(
 )
 
 
-@authentication_classes([TokenAuthentication])
 class StationViewSet(viewsets.ModelViewSet):
     serializer_class = StationSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]

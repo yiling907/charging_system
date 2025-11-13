@@ -3,6 +3,7 @@ __pycache__/
 log/
 .DS_Store
 lambda/
+static/
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml

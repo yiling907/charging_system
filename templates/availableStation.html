@@ -115,9 +115,7 @@
     async function fetchAllPorts() {
         try {
             showLoading();
-            const response = await fetch(backendbaseurl+'/api/charging/stations/?charger_status=idle', {
-                headers: {'Token': localStorage.getItem('token')}
-            });
+            const response = await fetch(backendbaseurl+'/api/charging/stations/?charger_status=idle',);
             const data = await response.json();
             allPorts = data.results || [];
         } catch (error) {

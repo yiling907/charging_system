@@ -1,4 +1,4 @@
-let backendbaseurl = "http://localhost:8080";
+let backendbaseurl = "https://v1wap266rf.execute-api.us-east-1.amazonaws.com/dev/backend";
 let apigatewaybaseurl = "https://v1wap266rf.execute-api.us-east-1.amazonaws.com/dev/html/";
 let thirdpartapibaseurl="https://u1fpdf62ng.execute-api.us-east-1.amazonaws.com/Dev/"
 
