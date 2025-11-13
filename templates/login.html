@@ -60,7 +60,7 @@
         </div>
         <button type="submit">Login</button>
         <p style="margin-top:15px; text-align:center;">
-            Don't have an account? <a href="{% url 'register' %}">Register now</a>
+            Don't have an account? <a href="register.html">Register now</a>
         </p>
     </form>
 </div>
@@ -80,7 +80,7 @@
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('username', response.data.user.username)
             localStorage.setItem('userId', response.data.user.id)
-            window.location.href = "{% url 'user_inform' %}";
+            window.location.href = apigatewaybaseurl+"userInfo.html";
         } catch (err) {
             errorMsg.textContent = err.response?.data?.message || 'Login failed, please try again';
         }

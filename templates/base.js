@@ -1,5 +1,6 @@
 let backendbaseurl = "http://localhost:8080";
-let apigatewaybaseurl = "http://localhost:4566/restapis/aarursynm0/v1/_user_request_/html/";
+let apigatewaybaseurl = "https://v1wap266rf.execute-api.us-east-1.amazonaws.com/dev/html/";
+let thirdpartapibaseurl="https://u1fpdf62ng.execute-api.us-east-1.amazonaws.com/Dev/"
 
 function getQueryVariable(variable) {
     var query = window.location.search.substring(1);

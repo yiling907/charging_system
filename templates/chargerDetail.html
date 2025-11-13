@@ -475,7 +475,7 @@
     function goToStation() {
         console.log(stationId)
         if (stationId) {
-            window.location.href = "/stations/" + stationId;
+            window.location.href = apigatewaybaseurl+"stationDetail.html?station_id=" + stationId;
         } else {
             showToast('Station information does not exist');
         }

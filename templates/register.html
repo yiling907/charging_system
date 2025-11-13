@@ -68,7 +68,7 @@
         </div>
         <button type="submit">Register</button>
         <p style="margin-top:15px; text-align:center;">
-            Already have an account? <a href="{% url 'login' %}">Go to login</a>
+            Already have an account? <a href="login.html">Go to login</a>
         </p>
     </form>
 </div>
@@ -90,7 +90,7 @@
             alert('Registration successful!');
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('username', response.data.user.username)
-            window.location.href = "{% url 'login' %}";
+            window.location.href = "login.html";
         } catch (err) {
             errorMsg.textContent = err.response?.data?.message || 'Registration failed (username may already exist)';
         }

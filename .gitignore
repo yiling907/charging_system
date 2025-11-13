@@ -2,6 +2,7 @@ env
 __pycache__/
 log/
 .DS_Store
+lambda/
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml

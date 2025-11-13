@@ -79,12 +79,8 @@
 <script>
     async function loadApiKey() {
         try {
-            const response = await fetch(backendbaseurl + '/api/v1/google_api_key', {
-                headers: {'Token': localStorage.getItem('token')}
-            });
+            const response = await fetch(thirdpartapibaseurl + 'api/google_map/apikey',);
             const {google_maps_api_key} = await response.json();
-            console.log(google_maps_api_key)
-
             
             const script = document.createElement('script');
             script.src = `https://maps.googleapis.com/maps/api/js?key=${google_maps_api_key}`;
