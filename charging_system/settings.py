@@ -19,12 +19,6 @@ LOGGING = {
         },
     },
     'handlers': {
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': './log/django/app.log',
-            'formatter': 'verbose',
-        },
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
