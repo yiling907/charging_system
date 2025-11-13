@@ -113,8 +113,6 @@ TEMPLATES = [
     },
 ]
 
-FORCE_SCRIPT_NAME = '/dev/backend'
-
 WSGI_APPLICATION = 'charging_system.wsgi.application'
 
 # 数据库配置
