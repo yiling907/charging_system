@@ -288,11 +288,10 @@
 
     const API_BASE_URL = backendbaseurl + '/api/charging';
 
-
     const statusStyles = {
         'completed': {class: 'bg-success/10 text-success', text: 'Completed'},
-        'charging': {class: 'bg-primary/10 text-primary', text: 'Charging'},
-        'failed': {class: 'bg-danger/10 text-danger', text: 'Failed'},
+        'in progress': {class: 'bg-primary/10 text-primary', text: 'In Progress'},
+        'not started': {class: 'bg-danger/10 text-danger', text: 'Not Started'},
     };
 
     const payStatusStyles = {

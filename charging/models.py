@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.utils import timezone
 import uuid
 
 class User(AbstractUser):
@@ -22,6 +21,7 @@ class Station(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField("Station Name", max_length=100)
     address = models.TextField("Address")
+    # @todo: auto calculate Latitude and Longitude via google map API
     latitude = models.DecimalField("Latitude", max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField("Longitude", max_digits=9, decimal_places=6, null=True, blank=True)
     is_active = models.BooleanField("Operational", default=True)
@@ -83,6 +83,11 @@ class ChargingRecord(models.Model):
         ('paid', 'Paid'),
         ('refunded', 'Refunded'),
     )
+    STATUS = (
+        ('completed', 'Completed'),
+        ('in progress', 'In Progress'),
+        ('not started', 'Not Started'),
+    )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     charger = models.ForeignKey(Charger, on_delete=models.CASCADE, related_name="records")
@@ -91,8 +96,9 @@ class ChargingRecord(models.Model):
     end_time = models.DateTimeField("End Time", null=True, blank=True)
     duration = models.IntegerField("Duration (minutes)", null=True, blank=True)
     electricity = models.DecimalField("Energy (kWh)", max_digits=5, decimal_places=2, null=True, blank=True)
-    fee = models.DecimalField("Total Fee (¥)", max_digits=6, decimal_places=2, null=True, blank=True)
+    fee = models.DecimalField("Total Fee (€)", max_digits=6, decimal_places=2, null=True, blank=True)
     pay_status = models.CharField("Payment Status", max_length=10, choices=PAY_STATUS, default='unpaid')
+    status = models.CharField("Status", max_length=15, choices=STATUS, default='not started')
     transaction_id = models.CharField("Transaction ID", max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
