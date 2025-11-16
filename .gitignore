@@ -4,7 +4,6 @@ log/
 .DS_Store
 lambda/
 static/
-db.sqlite3
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml

@@ -27,12 +27,15 @@
             .info-label {
                 @apply w-28 font-semibold text-gray-700 inline-block;
             }
+
             .input-field {
                 @apply px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all;
             }
+
             .btn {
                 @apply px-4 py-2 rounded-lg font-medium transition-all shadow-sm;
             }
+
             .avatar-hover {
                 @apply hover:ring-2 hover:ring-primary/70 hover:scale-105 transition-all duration-300;
             }
@@ -40,224 +43,230 @@
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen py-8">
-    <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-        <div class="bg-primary text-white p-6">
-            <h2 class="text-2xl font-bold flex items-center">
-                <i class="fa fa-user-circle mr-2"></i>Personal Information
-            </h2>
-            <p class="text-primary-100 mt-1">Manage your account basic information</p>
+<div class="max-w-2xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+    <div class="bg-primary text-white p-6">
+        <h2 class="text-2xl font-bold flex items-center">
+            <i class="fa fa-user-circle mr-2"></i>Personal Information
+        </h2>
+        <p class="text-primary-100 mt-1">Manage your account basic information</p>
+    </div>
+
+    <div class="p-6 md:p-8">
+        <div class="flex flex-col md:flex-row items-start md:items-center mb-8 pb-8 border-b border-gray-100">
+            <span class="info-label mb-4 md:mb-0">Profile Picture:</span>
+            <div class="relative">
+                <div id="avatarPreview"
+                     class="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-100 avatar-hover cursor-pointer">
+                    <img src="https://picsum.photos/id/64/200/200" alt="Profile Picture"
+                         class="w-full h-full object-cover">
+                </div>
+                <label for="avatarUpload"
+                       class="absolute bottom-0 right-0 bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center shadow-md cursor-pointer hover:bg-primary/90 transition-all">
+                    <i class="fa fa-camera"></i>
+                </label>
+                <input type="file" id="avatarUpload" accept="image/*" class="hidden">
+            </div>
+            <p class="ml-0 md:ml-4 mt-2 text-sm text-gray-500">
+                <i class="fa fa-info-circle mr-1"></i>Supports JPG, PNG formats, recommended size 200x200px
+            </p>
         </div>
 
-        <div class="p-6 md:p-8">
-            <div class="flex flex-col md:flex-row items-start md:items-center mb-8 pb-8 border-b border-gray-100">
-                <span class="info-label mb-4 md:mb-0">Profile Picture:</span>
-                <div class="relative">
-                    <div id="avatarPreview" class="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-100 avatar-hover cursor-pointer">
-                        <img src="https://picsum.photos/id/64/200/200" alt="Profile Picture" class="w-full h-full object-cover">
-                    </div>
-                    <label for="avatarUpload" class="absolute bottom-0 right-0 bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center shadow-md cursor-pointer hover:bg-primary/90 transition-all">
-                        <i class="fa fa-camera"></i>
-                    </label>
-                    <input type="file" id="avatarUpload" accept="image/*" class="hidden">
-                </div>
-                <p class="ml-0 md:ml-4 mt-2 text-sm text-gray-500">
-                    <i class="fa fa-info-circle mr-1"></i>Supports JPG, PNG formats, recommended size 200x200px
-                </p>
-            </div>
-
-            <div class="mb-6 pb-6 border-b border-gray-100">
-                <span class="info-label">Username:</span>
-                <input
+        <div class="mb-6 pb-6 border-b border-gray-100">
+            <span class="info-label">Username:</span>
+            <input
                     type="text"
                     id="username"
                     disabled
                     class="input-field bg-gray-50 cursor-not-allowed w-[calc(100%-7rem)] md:w-[calc(100%-8rem)]"
-                >
-            </div>
+            >
+        </div>
 
-            <div class="mb-6 pb-6 border-b border-gray-100">
-                <span class="info-label">Email:</span>
-                <input
+        <div class="mb-6 pb-6 border-b border-gray-100">
+            <span class="info-label">Email:</span>
+            <input
                     type="email"
                     id="email"
                     disabled
                     class="input-field bg-gray-50 cursor-not-allowed w-[calc(100%-7rem)] md:w-[calc(100%-8rem)]"
-                >
-            </div>
+            >
+        </div>
 
-            <div class="mb-6 pb-6 border-b border-gray-100">
-                <span class="info-label">Phone Number:</span>
-                <input
+        <div class="mb-6 pb-6 border-b border-gray-100">
+            <span class="info-label">Phone Number:</span>
+            <input
                     type="tel"
                     id="phone"
                     disabled
                     class="input-field bg-gray-50 cursor-not-allowed w-[calc(100%-7rem)] md:w-[calc(100%-8rem)]"
-                >
-            </div>
+            >
+        </div>
 
-            <div class="mb-8">
-                <span class="info-label">Registration Date:</span>
-                <span id="register_time" class="text-gray-600"></span>
-            </div>
+        <div class="mb-8">
+            <span class="info-label">Registration Date:</span>
+            <span id="register_time" class="text-gray-600"></span>
+        </div>
 
-            <div class="flex flex-wrap gap-3 mb-8">
-                <button
+        <div class="flex flex-wrap gap-3 mb-8">
+            <button
                     id="editBtn"
                     class="btn bg-primary text-white hover:bg-primary/90 flex items-center"
-                >
-                    <i class="fa fa-pencil mr-2"></i>Edit Information
-                </button>
-                <button
+            >
+                <i class="fa fa-pencil mr-2"></i>Edit Information
+            </button>
+            <button
                     id="saveBtn"
                     class="btn bg-secondary text-white hover:bg-secondary/90 flex items-center hidden"
-                >
-                    <i class="fa fa-check mr-2"></i>Save Changes
-                </button>
-                <button
+            >
+                <i class="fa fa-check mr-2"></i>Save Changes
+            </button>
+            <button
                     id="uploadAvatarBtn"
                     class="btn bg-blue-600 text-white hover:bg-blue-700 flex items-center hidden"
-                >
-                    <i class="fa fa-upload mr-2"></i>Confirm Avatar Upload
-                </button>
-            </div>
+            >
+                <i class="fa fa-upload mr-2"></i>Confirm Avatar Upload
+            </button>
+        </div>
 
-            <div class="text-right text-gray-600 border-t border-gray-100 pt-6">
-                <a
+        <div class="text-right text-gray-600 border-t border-gray-100 pt-6">
+            <a
                     href="availableStation.html"
                     class="text-primary hover:text-primary/80 mr-4 transition-colors"
-                >
-                    <i class="fa fa-map-marker mr-1"></i>View Available Charging Stations
-                </a>
-                <a
+            >
+                <i class="fa fa-map-marker mr-1"></i>View Available Charging Stations
+            </a>
+            <a
                     href="javascript:logout()"
                     class="text-gray-500 hover:text-red-500 transition-colors"
-                >
-                    <i class="fa fa-sign-out mr-1"></i>Logout
-                </a>
-            </div>
+            >
+                <i class="fa fa-sign-out mr-1"></i>Logout
+            </a>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="base.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="base.js"></script>
 
-    <script>
-        let selectedAvatarFile = null;
+<script>
+    let selectedAvatarFile = null;
 
-        window.onload = async () => {
-            try {
-                axios.defaults.headers.common['Authorization'] = `Token ${localStorage.getItem('token')}`;
+    window.onload = async () => {
+        try {
+            axios.defaults.headers.common['Authorization'] = `Token ${localStorage.getItem('token')}`;
 
-                const response = await axios.get(backendbaseurl+'/api/charging/user/' + localStorage.getItem('username')+'/', {
-                    headers: {
-                        'Token': localStorage.getItem('token')
-                    },
-                });
-                const user = response.data;
-                console.log(user)
+            const response = await axios.get(backendbaseurl + '/api/charging/user/' + localStorage.getItem('username') + '/', {
+                headers: {
+                    'Token': localStorage.getItem('token')
+                },
+            });
+            const user = response.data;
+            console.log(user)
 
-                document.getElementById('username').value = user.username;
-                document.getElementById('email').value = user.email || 'Not filled';
-                document.getElementById('phone').value = user.phone || 'Not filled';
-                document.getElementById('register_time').textContent = user.date_joined || 'Unknown';
-            } catch (err) {
-                alert('Please log in first!');
-                window.location.href = "login.html";
-            }
-        };
-
-        document.getElementById('avatarUpload').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-            if (!allowedTypes.includes(file.type)) {
-                alert('Please upload JPG or PNG format images!');
-                return;
-            }
-
-            if (file.size > 2 * 1024 * 1024) {
-                alert('Image size cannot exceed 2MB!');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = (readerEvent) => {
-                document.querySelector('#avatarPreview img').src = readerEvent.target.result;
-            };
-            reader.readAsDataURL(file);
-
-            selectedAvatarFile = file;
-            document.getElementById('uploadAvatarBtn').classList.remove('hidden');
-        });
-
-        document.getElementById('uploadAvatarBtn').addEventListener('click', async () => {
-            if (!selectedAvatarFile) {
-                alert('Please select an avatar to upload first!');
-                return;
-            }
-
-            try {
-                const formData = new FormData();
-                formData.append('avatar', selectedAvatarFile);
-
-                await axios.patch(
-                    backendbaseurl+'/api/charging/user/' + localStorage.getItem('username')+'/',
-                    formData,
-                    {
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                            'Authorization': `Token ${localStorage.getItem('token')}`
-                        }
-                    }
-                );
-
-                alert('Avatar uploaded successfully!');
-                document.getElementById('uploadAvatarBtn').classList.add('hidden');
-            } catch (err) {
-                alert('Avatar upload failed: ' + (err.response?.data?.message || 'Server error'));
-            }
-        });
-
-        document.getElementById('editBtn').addEventListener('click', () => {
-            const emailInput = document.getElementById('email');
-            const phoneInput = document.getElementById('phone');
-
-            emailInput.disabled = false;
-            phoneInput.disabled = false;
-            emailInput.classList.remove('bg-gray-50', 'cursor-not-allowed');
-            phoneInput.classList.remove('bg-gray-50', 'cursor-not-allowed');
-
-            document.getElementById('editBtn').classList.add('hidden');
-            document.getElementById('saveBtn').classList.remove('hidden');
-        });
-
-        document.getElementById('saveBtn').addEventListener('click', async () => {
-            try {
-                await axios.patch(backendbaseurl+'/api/charging/user/' + localStorage.getItem('username')+'/', {
-                    email: document.getElementById('email').value,
-                    phone: document.getElementById('phone').value
-                });
-                alert('Information updated successfully!');
-
-                const emailInput = document.getElementById('email');
-                const phoneInput = document.getElementById('phone');
-                emailInput.disabled = true;
-                phoneInput.disabled = true;
-                emailInput.classList.add('bg-gray-50', 'cursor-not-allowed');
-                phoneInput.classList.add('bg-gray-50', 'cursor-not-allowed');
-
-                document.getElementById('editBtn').classList.remove('hidden');
-                document.getElementById('saveBtn').classList.add('hidden');
-            } catch (err) {
-                alert('Update failed: ' + (err.response?.data?.message || 'Server error'));
-            }
-        });
-
-        function logout() {
-            localStorage.removeItem('token');
+            document.getElementById('username').value = user.username;
+            document.getElementById('email').value = user.email || 'Not filled';
+            document.getElementById('phone').value = user.phone || 'Not filled';
+            document.getElementById('register_time').textContent = user.date_joined || 'Unknown';
+        } catch (err) {
+            alert('Please log in first!');
             window.location.href = "login.html";
         }
-    </script>
+    };
+
+    document.getElementById('avatarUpload').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (!allowedTypes.includes(file.type)) {
+            alert('Please upload JPG or PNG format images!');
+            return;
+        }
+
+        if (file.size > 2 * 1024 * 1024) {
+            alert('Image size cannot exceed 2MB!');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (readerEvent) => {
+            document.querySelector('#avatarPreview img').src = readerEvent.target.result;
+        };
+        reader.readAsDataURL(file);
+
+        selectedAvatarFile = file;
+        document.getElementById('uploadAvatarBtn').classList.remove('hidden');
+    });
+
+    document.getElementById('uploadAvatarBtn').addEventListener('click', async () => {
+        if (!selectedAvatarFile) {
+            alert('Please select an avatar to upload first!');
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('avatar', selectedAvatarFile);
+
+            await axios.post(
+                awsapibaseurl + '/user/avatar',
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                    body: {
+                        "user_id": localStorage.getItem('userId'),
+                        "file_name": "placeholder.png",
+                        'image':formData
+                    }
+                }
+            );
+
+            alert('Avatar uploaded successfully!');
+            document.getElementById('uploadAvatarBtn').classList.add('hidden');
+        } catch (err) {
+            alert('Avatar upload failed: ' + (err.response?.data?.message || 'Server error'));
+        }
+    });
+
+    document.getElementById('editBtn').addEventListener('click', () => {
+        const emailInput = document.getElementById('email');
+        const phoneInput = document.getElementById('phone');
+
+        emailInput.disabled = false;
+        phoneInput.disabled = false;
+        emailInput.classList.remove('bg-gray-50', 'cursor-not-allowed');
+        phoneInput.classList.remove('bg-gray-50', 'cursor-not-allowed');
+
+        document.getElementById('editBtn').classList.add('hidden');
+        document.getElementById('saveBtn').classList.remove('hidden');
+    });
+
+    document.getElementById('saveBtn').addEventListener('click', async () => {
+        try {
+            await axios.patch(backendbaseurl + '/api/charging/user/' + localStorage.getItem('username') + '/', {
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value
+            });
+            alert('Information updated successfully!');
+
+            const emailInput = document.getElementById('email');
+            const phoneInput = document.getElementById('phone');
+            emailInput.disabled = true;
+            phoneInput.disabled = true;
+            emailInput.classList.add('bg-gray-50', 'cursor-not-allowed');
+            phoneInput.classList.add('bg-gray-50', 'cursor-not-allowed');
+
+            document.getElementById('editBtn').classList.remove('hidden');
+            document.getElementById('saveBtn').classList.add('hidden');
+        } catch (err) {
+            alert('Update failed: ' + (err.response?.data?.message || 'Server error'));
+        }
+    });
+
+    function logout() {
+        localStorage.removeItem('token');
+        window.location.href = "login.html";
+    }
+</script>
 </body>
 </html>
