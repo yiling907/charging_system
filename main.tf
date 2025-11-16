@@ -2,6 +2,13 @@ provider "aws" {
   region = "us-east-1"
 }
 
+resource "aws_s3_bucket" "user_avatar_bucket" {
+  bucket = "user-avatar-bucket-dev"
+  tags = {
+    Name = "Avatar Upload Bucket"
+    Environment = "Dev"
+  }
+}
 
 resource "aws_sqs_queue" "order_status_queue" {
   name                      = "order-status-change-queue"
@@ -69,6 +76,24 @@ resource "aws_lambda_function" "scheduled_status_update_function" {
   ]
 }
 
+resource "aws_lambda_function" "upload_avatar_function" {
+  function_name    = "upload-avatar-function"
+  filename         = "upload_avatar.zip"
+  source_code_hash = filebase64sha256("upload_avatar.zip")
+  handler          = "upload_avatar.handler"
+  runtime          = "python3.9"
+  role             = "arn:aws:iam::362643364860:role/LabRole"
+
+  environment {
+    variables = {
+      UPDATE_CHARGER_STATUS_API = aws_s3_bucket.user_avatar_bucket.bucket,
+    }
+  }
+  layers = [
+    aws_lambda_layer_version.requests_layer.arn
+  ]
+}
+
 
 resource "aws_api_gateway_rest_api" "gateway" {
   name                         = "IntegrationAPI"
@@ -120,6 +145,18 @@ resource "aws_api_gateway_resource" "orders" {
   rest_api_id = aws_api_gateway_rest_api.gateway.id
   parent_id   = aws_api_gateway_resource.service_management.id
   path_part   = "orders"
+}
+
+resource "aws_api_gateway_resource" "user" {
+  rest_api_id = aws_api_gateway_rest_api.gateway.id
+  parent_id   = aws_api_gateway_resource.service_management.id
+  path_part   = "user"
+}
+
+resource "aws_api_gateway_resource" "upload_avatar" {
+  rest_api_id = aws_api_gateway_rest_api.gateway.id
+  parent_id   = aws_api_gateway_resource.user.id
+  path_part   = "avatar"
 }
 
 resource "aws_api_gateway_method" "backend_proxy_method" {
@@ -189,7 +226,14 @@ resource "aws_api_gateway_method" "create_order_method" {
   authorization = "NONE"
 }
 
-resource "aws_api_gateway_integration" "lambda_integration" {
+resource "aws_api_gateway_method" "upload_avatar_method" {
+  rest_api_id   = aws_api_gateway_rest_api.gateway.id
+  resource_id   = aws_api_gateway_resource.upload_avatar.id
+  http_method   = "PUT"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "orders_create_integration" {
   rest_api_id             = aws_api_gateway_rest_api.gateway.id
   resource_id             = aws_api_gateway_resource.orders.id
   http_method             = aws_api_gateway_method.create_order_method.http_method
@@ -198,10 +242,29 @@ resource "aws_api_gateway_integration" "lambda_integration" {
   integration_http_method = "POST"
 }
 
-resource "aws_lambda_permission" "apigw_lambda" {
+resource "aws_lambda_permission" "orders_create_lambda_premission" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.create_order_function.function_name
+  principal     = "apigateway.amazonaws.com"
+
+  # More: http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.html
+  source_arn = "${aws_api_gateway_rest_api.gateway.execution_arn}/*"
+}
+
+resource "aws_api_gateway_integration" "upload_avatar_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.gateway.id
+  resource_id             = aws_api_gateway_resource.upload_avatar.id
+  http_method             = aws_api_gateway_method.upload_avatar_method.http_method
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.upload_avatar_function.invoke_arn
+  integration_http_method = "PUT"
+}
+
+resource "aws_lambda_permission" "upload_avatar_lambda_permission" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.upload_avatar_function.function_name
   principal     = "apigateway.amazonaws.com"
 
   # More: http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.html
