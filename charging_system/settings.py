@@ -49,9 +49,7 @@ INSTALLED_APPS = [
 
     # 自定义应用
     'charging',
-    'payments',
     'dashboard',
-    'proxy_api'
 ]
 
 MIDDLEWARE = [
@@ -115,7 +113,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'charging_system.wsgi.application'
 
-# 数据库配置
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -123,7 +120,6 @@ DATABASES = {
     }
 }
 
-# 自定义用户模型
 AUTH_USER_MODEL = 'charging.User'
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -133,7 +129,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# DRF 配置
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -144,9 +139,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
 }
-
-# 支付网关配置（示例）
-PAYMENT_GATEWAY_URL = 'https://mock-payment-gateway.com/pay'
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Asia/Shanghai'

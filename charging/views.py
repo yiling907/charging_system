@@ -20,50 +20,12 @@ from .serializers import (
     ChargingRecordSerializer
 )
 from .permissions import IsOperator, IsMaintenanceStaff
-from payments.services import create_payment
 
 # views.py
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from .serializers import UserSerializer  # 自定义用户序列化器
-
-
-def index(request):
-    return render(request, 'index.html')
-
-
-def register(request):
-    return render(request, 'register.html')
-
-
-def user_inform(request):
-    return render(request, 'userInfo.html')
-
-
-def order_create(request, charger_id):
-    charger = Charger.objects.filter(id=charger_id)
-    return render(request, 'orderCreate.html', context={'charger': charger})
-
-
-def available_station(request):
-    return render(request, 'availableStation.html')
-
-
-def stations_detail(request, id):
-    return render(request, 'stationDetail.html')
-
-
-def chargers_detail(request, id):
-    return render(request, 'chargerDetail.html')
-
-
-def records(request):
-    return render(request, 'chargerRecord.html')
-
-
-def temp(request):
-    return render(request, 'temp.html')
 
 
 class UserLoginView(ObtainAuthToken):
