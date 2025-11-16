@@ -245,18 +245,17 @@ function onGooglePaymentButtonClicked() {
                 });
                 console.log(response)
                 const data = await response.data;
-                await axios.post(
+                const response_lambda = await axios.post(
                     awsapibaseurl + '/orders',
                     {
                         paymentToken: paymentToken,
                         chargingTime: Number(selectedPackage.dataset.time),
-                        charger: getQueryVariable("charger_id"),
                         recordId: data.id,
                         chargerId: getChargerId()
                     }
                 );
 
-                if (response.data.success) {
+                if (response_lambda.statusCode === 200) {
                     alert('Payment successful! Redirecting to order list...');
                     window.location.href = apigatewaybaseurl + 'chargerRecord.html';
                     return resolve({transactionState: 'SUCCESS'});
