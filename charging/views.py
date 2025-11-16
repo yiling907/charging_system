@@ -117,13 +117,10 @@ class StationViewSet(viewsets.ModelViewSet):
     ordering_fields = ['name', 'created_at']
 
     def get_queryset(self):
-        # 基础查询集
         queryset = Station.objects.all()
 
-        # 获取过滤条件中的充电桩状态（假设你的过滤器用'charger_status'作为参数名）
         charger_status = self.request.query_params.get('charger_status')
 
-        # 如果有状态过滤条件，对预加载的chargers也应用过滤
         if charger_status:
             queryset = queryset.prefetch_related(
                 Prefetch(
@@ -133,12 +130,11 @@ class StationViewSet(viewsets.ModelViewSet):
                 )
             )
         else:
-            # 无过滤时加载所有充电桩
             queryset = queryset.exclude(chargers__isnull=True).prefetch_related(
                 Prefetch(
                     'chargers',
-                    queryset=Charger.objects.all(),  # 全部充电桩
-                    to_attr='filtered_chargers'  # 同样用 filtered_chargers
+                    queryset=Charger.objects.all(),
+                    to_attr='filtered_chargers'
                 ))
 
         return queryset
@@ -172,6 +168,13 @@ class ChargerViewSet(viewsets.ModelViewSet):
         charger.status = 'idle'
         charger.save()
         return Response({'status': 'charger activated'})
+
+    @action(detail=True, methods=['post'])
+    def set_inactive(self, request, pk=None):
+        charger = self.get_object()
+        charger.status = 'charging'
+        charger.save()
+        return Response({'status': 'charger inactivated'})
 
 
 class ChargingRecordViewSet(viewsets.ModelViewSet):

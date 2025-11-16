@@ -1,106 +1,243 @@
-<button id="googlePayButton" class="google-pay-button" onclick="initGooglePay()">
-    pay by google
-</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Order</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
 
-<div id="paymentResult"></div>
+        body {
+            background-color: #f5f7fa;
+            padding: 20px 15px;
+            min-height: 100vh;
+        }
+
+        .order-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .order-header {
+            background-color: #165DFF;
+            color: white;
+            padding: 20px 25px;
+        }
+
+        .order-header h2 {
+            font-size: 22px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .order-header h2::before {
+            content: "⚡";
+            margin-right: 8px;
+        }
+
+        .order-header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .order-content {
+            padding: 25px;
+        }
+
+        .package-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        @media (min-width: 640px) {
+            .package-list {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+            }
+        }
+
+        .package-item {
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .package-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .package-item.active {
+            border-color: #165DFF;
+            background-color: #f0f7ff;
+        }
+
+        .package-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .package-title::before {
+            content: "🔋";
+            margin-right: 8px;
+        }
+
+        .package-item div {
+            color: #4b5563;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .package-item div:nth-child(2)::before {
+            content: "⏱️ ";
+        }
+
+        .package-item div:nth-child(3)::before {
+            content: "🎯 ";
+        }
+
+        .package-price {
+            color: #dc3545;
+            font-size: 22px;
+            font-weight: 700;
+            margin-top: 15px;
+        }
+
+        .order-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .order-btn:disabled {
+            background-color: #e57373;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .order-btn:not(:disabled):active {
+            transform: scale(0.98);
+        }
+
+        .order-btn::before {
+            content: "✓ ";
+            margin-right: 6px;
+        }
+
+        .order-btn.loading {
+            background-color: #165DFF;
+        }
+
+        .order-btn.loading::before {
+            content: "⏳ ";
+        }
+    </style>
+</head>
+<body>
+<div class="order-container">
+    <div class="order-header">
+        <h2>Select Charging Package and Create Order</h2>
+        <p>Choose the appropriate charging duration based on your needs</p>
+    </div>
+
+    <div class="order-content">
+        <div class="package-list">
+            <div class="package-item" data-id="1" data-time="1" data-price="10">
+                <div class="package-title">1-Hour Fast Charge</div>
+                <div>Charging Duration: 1 Hour</div>
+                <div>Applicable Scenario: Emergency Charging</div>
+                <div class="package-price">¥10</div>
+            </div>
+            <div class="package-item" data-id="2" data-time="3" data-price="20">
+                <div class="package-title">3-Hour Slow Charge</div>
+                <div>Charging Duration: 3 Hours</div>
+                <div>Applicable Scenario: Daily Charging</div>
+                <div class="package-price">¥20</div>
+            </div>
+            <div class="package-item" data-id="3" data-time="24" data-price="50">
+                <div class="package-title">All-Day Package</div>
+                <div>Charging Duration: 24 Hours</div>
+                <div>Applicable Scenario: Long-Term Parking</div>
+                <div class="package-price">¥50</div>
+            </div>
+        </div>
+        <div id="createOrderBtn" disabled>
+
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="base.js"></script>
+
+<script
+        async src="https://pay.google.com/gp/p/js/pay.js"
+        onload="onGooglePayLoaded()">
+</script>
 
 <script>
-    // 支付参数配置（核心）
-const paymentDataRequest = {
-  apiVersion: 2,
-  apiVersionMinor: 0,
-  merchantInfo: {
-    merchantId: "你的商户ID", // 从 Google Pay 控制台获取
-    merchantName: "你的商户名称"
-  },
-  allowedPaymentMethods: [
-    {
-      type: "CARD",
-      parameters: {
-        allowedAuthMethods: ["PAN_ONLY", "CRYPTOGRAM_3DS"], // 支持的验证方式
-        allowedCardNetworks: ["VISA", "MASTERCARD"] // 支持的卡组织
-      },
-      tokenizationSpecification: {
-        type: "PAYMENT_GATEWAY", // 支付网关模式（或 DIRECT 直接处理）
-        parameters: {
-          gateway: "你的支付网关名称", // 如 stripe、paypal 等
-          gatewayMerchantId: "网关商户ID" // 支付网关提供的商户ID
+
+    const getChargerId = () => {
+        return getQueryVariable("charger_id");
+    };
+    axios.defaults.headers.common['Authorization'] = `Token ${localStorage.getItem('token')}`;
+    let selectedPackageId = null;
+
+    document.querySelectorAll('.package-item').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('.package-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            selectedPackageId = item.dataset.id;
+            document.getElementById('createOrderBtn').disabled = false;
+        });
+    });
+
+    function formatTime(date) {
+        return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    }
+
+    function isLoggedIn() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('Please log in');
+            window.location.href = backendbaseurl + '/user/login';
+            return false;
         }
-      }
+        return true;
     }
-  ],
-  transactionInfo: {
-    totalPriceStatus: "FINAL", // 价格是否最终确定
-    totalPriceLabel: "总价",
-    totalPrice: "10.00", // 支付金额（字符串类型）
-    currencyCode: "CNY", // 货币代码（如 USD、CNY）
-    countryCode: "CN" // 国家代码
-  }
-};
 
-// 检查设备是否支持 Google Pay
-let paymentsClient;
-function initGooglePay() {
-  if (!paymentsClient) {
-    paymentsClient = new google.payments.api.PaymentsClient({
-      environment: "TEST" // 测试环境，生产环境用 "PRODUCTION"
+    document.getElementById('createOrderBtn').addEventListener('click', async () => {
+
     });
-  }
-
-  // 检查是否支持 Google Pay
-  paymentsClient.isReadyToPay({ allowedPaymentMethods: paymentDataRequest.allowedPaymentMethods })
-    .then(response => {
-      if (response.result) {
-        // 支持则发起支付
-        requestPayment();
-      } else {
-        alert("该设备不支持 Google Pay");
-      }
-    })
-    .catch(error => {
-      console.error("Google Pay 初始化失败:", error);
-    });
-}
-
-// 发起支付请求
-function requestPayment() {
-  paymentsClient.loadPaymentData(paymentDataRequest)
-    .then(paymentData => {
-      // 支付信息获取成功，发送到后端验证
-      handlePaymentSuccess(paymentData);
-    })
-    .catch(error => {
-      console.error("支付失败:", error);
-      document.getElementById("paymentResult").textContent = "支付失败，请重试";
-    });
-}
-
-// 处理支付成功的回调
-function handlePaymentSuccess(paymentData) {
-  // paymentData 包含加密的支付信息（如卡号令牌）
-  const paymentToken = paymentData.paymentMethodData.tokenizationData.token;
-
-  // 发送令牌到后端验证
-  fetch("/api/verify-google-pay", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      token: paymentToken,
-      amount: "10.00", // 金额需与前端一致，防止篡改
-      orderId: "ORDER_12345" // 订单ID
-    })
-  })
-  .then(response => response.json())
-  .then(result => {
-    if (result.success) {
-      document.getElementById("paymentResult").textContent = "支付成功！";
-      // 跳转到订单成功页
-    } else {
-      document.getElementById("paymentResult").textContent = "支付验证失败: " + result.message;
-    }
-  })
-  .catch(error => {
-    console.error("后端验证失败:", error);
-  });
-}
 </script>
+</body>
+</html>

@@ -189,13 +189,16 @@
                 <div class="package-price">¥50</div>
             </div>
         </div>
-        <button id="createOrderBtn" class="order-btn" disabled>Confirm Order</button>
+        <button id="createOrderBtn" disabled></button>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="base.js"></script>
-
+<script
+        async src="https://pay.google.com/gp/p/js/pay.js"
+        onload="onGooglePayLoaded()">
+</script>
 <script>
     const getChargerId = () => {
         return getQueryVariable("charger_id");
@@ -226,49 +229,7 @@
         return true;
     }
 
-    document.getElementById('createOrderBtn').addEventListener('click', async () => {
-        if (!isLoggedIn()) return;
 
-        const selectedPackage = document.querySelector(`.package-item[data-id="${selectedPackageId}"]`);
-        if (!selectedPackage) {
-            alert('Please select a charging package');
-            return;
-        }
-
-        try {
-            const orderBtn = document.getElementById('createOrderBtn');
-            orderBtn.disabled = true;
-            orderBtn.classList.add('loading');
-            orderBtn.textContent = 'Submitting...';
-
-            const now = new Date();
-            let futureDate = new Date(now);
-            futureDate.setHours(now.getHours() + Number(selectedPackage.dataset.time));
-
-            const response = await axios.post(backendbaseurl+'/api/charging/records/', {
-                start_time: formatTime(now),
-                end_time: formatTime(futureDate),
-                electricity: "220",
-                charger: getChargerId(),
-                fee: Number(selectedPackage.dataset.price),
-                user: localStorage.getItem('userId')
-            });
-
-            alert('Order created successfully! Redirecting to order list soon');
-            window.location.href = apigatewaybaseurl+ `chargerRecord.html`;
-
-        } catch (err) {
-            const orderBtn = document.getElementById('createOrderBtn');
-            orderBtn.disabled = false;
-            orderBtn.classList.remove('loading');
-            orderBtn.textContent = 'Confirm Order';
-
-            const errorMsg = err.response?.data?.error ||
-                            err.response?.data?.message ||
-                            'Failed to create order, please try again';
-            alert('Order creation failed: ' + errorMsg);
-        }
-    });
 </script>
 </body>
 </html>
