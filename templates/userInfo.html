@@ -204,20 +204,12 @@
         }
 
         try {
-            const formData = new FormData();
-            formData.append('avatar', selectedAvatarFile);
-
             await axios.post(
                 awsapibaseurl + '/user/avatar',
                 {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                    body: {
-                        "user_id": localStorage.getItem('userId'),
-                        "file_name": "placeholder.png",
-                        'image':formData
-                    }
+                    "user_id": localStorage.getItem('userId'),
+                    "file_name": selectedAvatarFile.name,
+                    'image': document.querySelector('#avatarPreview img').src.split(',')[1]
                 }
             );
 
