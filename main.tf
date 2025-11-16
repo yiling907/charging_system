@@ -86,7 +86,7 @@ resource "aws_lambda_function" "upload_avatar_function" {
 
   environment {
     variables = {
-      UPDATE_CHARGER_STATUS_API = aws_s3_bucket.user_avatar_bucket.bucket,
+      BUCKET_NAME = aws_s3_bucket.user_avatar_bucket.bucket,
     }
   }
   layers = [
@@ -229,7 +229,7 @@ resource "aws_api_gateway_method" "create_order_method" {
 resource "aws_api_gateway_method" "upload_avatar_method" {
   rest_api_id   = aws_api_gateway_rest_api.gateway.id
   resource_id   = aws_api_gateway_resource.upload_avatar.id
-  http_method   = "PUT"
+  http_method   = "POST"
   authorization = "NONE"
 }
 
@@ -242,7 +242,7 @@ resource "aws_api_gateway_integration" "orders_create_integration" {
   integration_http_method = "POST"
 }
 
-resource "aws_lambda_permission" "orders_create_lambda_premission" {
+resource "aws_lambda_permission" "orders_create_lambda_permission" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.create_order_function.function_name
@@ -258,11 +258,11 @@ resource "aws_api_gateway_integration" "upload_avatar_integration" {
   http_method             = aws_api_gateway_method.upload_avatar_method.http_method
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.upload_avatar_function.invoke_arn
-  integration_http_method = "PUT"
+  integration_http_method = "POST"
 }
 
 resource "aws_lambda_permission" "upload_avatar_lambda_permission" {
-  statement_id  = "AllowExecutionFromAPIGateway"
+  statement_id  = "AllowUploadAvatarFromAPIGateway"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.upload_avatar_function.function_name
   principal     = "apigateway.amazonaws.com"
@@ -271,10 +271,14 @@ resource "aws_lambda_permission" "upload_avatar_lambda_permission" {
   source_arn = "${aws_api_gateway_rest_api.gateway.execution_arn}/*"
 }
 
+resource "aws_api_gateway_deployment" "dev" {
+  rest_api_id = aws_api_gateway_rest_api.gateway.id
+
+}
 resource "aws_api_gateway_stage" "dev" {
   rest_api_id           = aws_api_gateway_rest_api.gateway.id
   stage_name            = "dev"
-  deployment_id         = "78qm9q"
+  deployment_id         = aws_api_gateway_deployment.dev.id
   cache_cluster_enabled = false
   xray_tracing_enabled  = false
 }

@@ -13,7 +13,7 @@ def handler(event, context):
         request_body = json.loads(event['body'])
         user_id = request_body.get('user_id')
         image = request_body.get('image')
-        file_name = user_id + '/' + event.get('file_name')
+        file_name = user_id + '/' + request_body.get('file_name')
 
         image_data = base64.b64decode(image)
 
