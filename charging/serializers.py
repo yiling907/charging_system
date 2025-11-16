@@ -44,6 +44,7 @@ class StationSerializer(serializers.ModelSerializer):
 
 class ChargingRecordSerializer(serializers.ModelSerializer):
     charger_code = serializers.ReadOnlyField(source='charger.code')
+    status = serializers.ReadOnlyField(source='charger.status')
     user_username = serializers.ReadOnlyField(source='user.username')
 
     class Meta:

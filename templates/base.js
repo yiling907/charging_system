@@ -245,11 +245,12 @@ function onGooglePaymentButtonClicked() {
                 });
                 console.log(response)
                 const data = await response.data;
+                console.log(data)
                 const response_lambda = await axios.post(
-                    awsapibaseurl + '/orders',
+                    awsapibaseurl + '/orders/',
                     {
                         paymentToken: paymentToken,
-                        chargingTime: Number(selectedPackage.dataset.time),
+                        chargingTime: 1,
                         recordId: data.id,
                         chargerId: getChargerId()
                     }
