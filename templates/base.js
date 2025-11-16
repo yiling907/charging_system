@@ -243,7 +243,7 @@ function onGooglePaymentButtonClicked() {
                     fee: Number(selectedPackage.dataset.price),
                     user: localStorage.getItem('userId')
                 });
-                                console.log(response)
+                console.log(response)
                 const data = await response.data;
                 await axios.post(
                     awsapibaseurl + '/orders',
@@ -251,7 +251,8 @@ function onGooglePaymentButtonClicked() {
                         paymentToken: paymentToken,
                         chargingTime: Number(selectedPackage.dataset.time),
                         charger: getQueryVariable("charger_id"),
-                        recordId: data.id
+                        recordId: data.id,
+                        chargerId: getChargerId()
                     }
                 );
 

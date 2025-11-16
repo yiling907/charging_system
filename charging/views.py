@@ -57,8 +57,10 @@ def stations_detail(request, id):
 def chargers_detail(request, id):
     return render(request, 'chargerDetail.html')
 
+
 def records(request):
     return render(request, 'chargerRecord.html')
+
 
 def temp(request):
     return render(request, 'temp.html')
@@ -184,7 +186,6 @@ class ChargingRecordViewSet(viewsets.ModelViewSet):
     filterset_fields = ['charger', 'user', 'pay_status']
     ordering_fields = ['start_time', 'fee']
 
-
     def perform_create(self, serializer):
         # 从验证后的数据中获取充电器对象（已通过序列化器验证）
         charger = serializer.validated_data['charger']
@@ -233,3 +234,10 @@ class ChargingRecordViewSet(viewsets.ModelViewSet):
                 obj.get_pay_status_display()
             ])
         return response
+
+    @action(detail=True, methods=['post'])
+    def set_paid(self, request, pk=None):
+        record = self.get_object()
+        record.pay_status = 'paid'
+        record.save()
+        return Response({'status': 'paid'})
