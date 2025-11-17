@@ -135,6 +135,86 @@ resource "aws_api_gateway_resource" "s3" {
   path_part   = "s3"
 }
 
+
+resource "aws_api_gateway_resource" "user_id" {
+  rest_api_id = aws_api_gateway_rest_api.gateway.id
+  parent_id   = aws_api_gateway_resource.s3.id
+  path_part   = "{user_id}"
+}
+
+
+resource "aws_api_gateway_resource" "image_name" {
+  rest_api_id = aws_api_gateway_rest_api.gateway.id
+  parent_id   = aws_api_gateway_resource.user_id.id
+  path_part   = "{image_name}"
+  depends_on  = [aws_api_gateway_resource.user_id]
+}
+
+
+resource "aws_api_gateway_method" "get_image" {
+  rest_api_id   = aws_api_gateway_rest_api.gateway.id
+  resource_id   = aws_api_gateway_resource.image_name.id
+  http_method   = "GET"
+  authorization = "NONE"
+
+  request_parameters = {
+    "method.request.path.user_id"  = true
+    "method.request.path.image_name" = true
+  }
+}
+
+
+resource "aws_api_gateway_method_response" "response_200" {
+  rest_api_id = aws_api_gateway_rest_api.gateway.id
+  resource_id = aws_api_gateway_resource.image_name.id
+  http_method = aws_api_gateway_method.get_image.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Content-Type" = true
+  }
+}
+
+resource "aws_api_gateway_method_response" "response_404" {
+  rest_api_id = aws_api_gateway_rest_api.gateway.id
+  resource_id = aws_api_gateway_resource.image_name.id
+  http_method = aws_api_gateway_method.get_image.http_method
+  status_code = "404"
+
+  response_parameters = {
+    "method.response.header.Content-Type" = true
+  }
+}
+
+resource "aws_api_gateway_integration" "s3_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.gateway.id
+  resource_id             = aws_api_gateway_resource.image_name.id
+  http_method             = aws_api_gateway_method.get_image.http_method
+  integration_http_method = "GET"
+  type                    = "AWS"
+  uri                     = "arn:aws:apigateway:us-east-1:s3:path/user-avatar-bucket-dev/{user_id}/{image_name}"
+  connection_type         = "INTERNET"
+  credentials             = "arn:aws:iam::362643364860:role/LabRole"
+
+  request_parameters = {
+    "integration.request.path.user_id"    = "method.request.path.user_id"
+    "integration.request.path.image_name" = "method.request.path.image_name"
+  }
+
+}
+
+
+resource "aws_api_gateway_integration_response" "s3_response" {
+  rest_api_id = aws_api_gateway_rest_api.gateway.id
+  resource_id = aws_api_gateway_resource.image_name.id
+  http_method = aws_api_gateway_method.get_image.http_method
+  status_code = aws_api_gateway_method_response.response_200.status_code
+  response_parameters = {
+    "method.response.header.Content-Type" = "integration.response.header.Content-Type"
+  }
+  depends_on = [aws_api_gateway_integration.s3_integration]
+
+}
 resource "aws_api_gateway_resource" "backend_proxy" {
   rest_api_id = aws_api_gateway_rest_api.gateway.id
   parent_id   = aws_api_gateway_resource.backend.id
@@ -147,11 +227,6 @@ resource "aws_api_gateway_resource" "html_proxy" {
   path_part   = "{proxy+}"
 }
 
-resource "aws_api_gateway_resource" "s3_proxy" {
-  rest_api_id = aws_api_gateway_rest_api.gateway.id
-  parent_id   = aws_api_gateway_resource.s3.id
-  path_part   = "{proxy+}"
-}
 
 resource "aws_api_gateway_resource" "orders" {
   rest_api_id = aws_api_gateway_rest_api.gateway.id
@@ -211,18 +286,6 @@ resource "aws_api_gateway_method" "html_proxy_method" {
   }
 }
 
-resource "aws_api_gateway_method" "s3_proxy_method" {
-  rest_api_id   = aws_api_gateway_rest_api.gateway.id
-  resource_id   = aws_api_gateway_resource.s3_proxy.id
-  http_method   = "ANY"
-  authorization = "NONE"
-
-  request_parameters = {
-    "method.request.path.proxy" = true
-  }
-
-
-}
 
 resource "aws_api_gateway_integration" "html_proxy_integration" {
   rest_api_id             = aws_api_gateway_rest_api.gateway.id
@@ -273,7 +336,7 @@ resource "aws_lambda_permission" "orders_create_lambda_permission" {
   function_name = aws_lambda_function.create_order_function.function_name
   principal     = "apigateway.amazonaws.com"
 
-  # More: http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.html
+
   source_arn = "${aws_api_gateway_rest_api.gateway.execution_arn}/*"
 }
 
@@ -286,64 +349,32 @@ resource "aws_api_gateway_integration" "upload_avatar_integration" {
   integration_http_method = "POST"
 }
 
-
-
-resource "aws_api_gateway_integration" "s3_proxy_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.gateway.id
-  resource_id             = aws_api_gateway_resource.s3_proxy.id
-  http_method             = aws_api_gateway_method.s3_proxy_method.http_method
-  integration_http_method = "GET"
-  type                    = "AWS"
-  uri                     = "arn:aws:apigateway:us-east-1:s3:path/user-avatar-bucket-dev/{proxy}/placeholder.png"
-  connection_type         = "INTERNET"
-  credentials             = "arn:aws:iam::362643364860:role/LabRole"
-
-  request_parameters = {
-    "integration.request.path.proxy" = "method.request.path.proxy"
-  }
-
-  passthrough_behavior = "WHEN_NO_MATCH"
-  timeout_milliseconds = 29000
-}
-resource "aws_api_gateway_method_response" "s3_proxy_response_200" {
-  rest_api_id = aws_api_gateway_rest_api.gateway.id
-  resource_id = aws_api_gateway_resource.s3_proxy.id
-  http_method = aws_api_gateway_method.s3_proxy_method.http_method
-  status_code = "200"
-
-  response_parameters = {
-    "method.response.header.Content-Type" = true
-  }
-}
-resource "aws_api_gateway_integration_response" "s3_proxy_response" {
-  rest_api_id = aws_api_gateway_rest_api.gateway.id
-  resource_id = aws_api_gateway_resource.s3_proxy.id
-  http_method = aws_api_gateway_method.s3_proxy_method.http_method
-  status_code = aws_api_gateway_method_response.s3_proxy_response_200.status_code
-  response_parameters = {
-    "method.response.header.Content-Type" = "integration.response.header.Content-Type"
-  }
-}
 resource "aws_lambda_permission" "upload_avatar_lambda_permission" {
   statement_id  = "AllowUploadAvatarFromAPIGateway"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.upload_avatar_function.function_name
   principal     = "apigateway.amazonaws.com"
 
-  # More: http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.html
+
   source_arn = "${aws_api_gateway_rest_api.gateway.execution_arn}/*"
 }
 
 resource "aws_api_gateway_deployment" "dev" {
   rest_api_id = aws_api_gateway_rest_api.gateway.id
 
+  triggers = {
+    redeployment = sha1(jsonencode(aws_api_gateway_rest_api.gateway.body))
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
+
 resource "aws_api_gateway_stage" "dev" {
-  rest_api_id           = aws_api_gateway_rest_api.gateway.id
-  stage_name            = "dev"
-  deployment_id         = aws_api_gateway_deployment.dev.id
-  cache_cluster_enabled = false
-  xray_tracing_enabled  = false
+  deployment_id = aws_api_gateway_deployment.dev.id
+  rest_api_id   = aws_api_gateway_rest_api.gateway.id
+  stage_name    = "dev"
 }
 
 
