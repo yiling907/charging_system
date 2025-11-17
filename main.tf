@@ -5,7 +5,7 @@ provider "aws" {
 resource "aws_s3_bucket" "user_avatar_bucket" {
   bucket = "user-avatar-bucket-dev"
   tags = {
-    Name = "Avatar Upload Bucket"
+    Name        = "Avatar Upload Bucket"
     Environment = "Dev"
   }
 }
@@ -129,6 +129,12 @@ resource "aws_api_gateway_resource" "html" {
   path_part   = "html"
 }
 
+resource "aws_api_gateway_resource" "s3" {
+  rest_api_id = aws_api_gateway_rest_api.gateway.id
+  parent_id   = aws_api_gateway_resource.root.id
+  path_part   = "s3"
+}
+
 resource "aws_api_gateway_resource" "backend_proxy" {
   rest_api_id = aws_api_gateway_rest_api.gateway.id
   parent_id   = aws_api_gateway_resource.backend.id
@@ -138,6 +144,12 @@ resource "aws_api_gateway_resource" "backend_proxy" {
 resource "aws_api_gateway_resource" "html_proxy" {
   rest_api_id = aws_api_gateway_rest_api.gateway.id
   parent_id   = aws_api_gateway_resource.html.id
+  path_part   = "{proxy+}"
+}
+
+resource "aws_api_gateway_resource" "s3_proxy" {
+  rest_api_id = aws_api_gateway_rest_api.gateway.id
+  parent_id   = aws_api_gateway_resource.s3.id
   path_part   = "{proxy+}"
 }
 
@@ -197,6 +209,19 @@ resource "aws_api_gateway_method" "html_proxy_method" {
   request_parameters = {
     "method.request.path.proxy" = true
   }
+}
+
+resource "aws_api_gateway_method" "s3_proxy_method" {
+  rest_api_id   = aws_api_gateway_rest_api.gateway.id
+  resource_id   = aws_api_gateway_resource.s3_proxy.id
+  http_method   = "ANY"
+  authorization = "NONE"
+
+  request_parameters = {
+    "method.request.path.proxy" = true
+  }
+
+
 }
 
 resource "aws_api_gateway_integration" "html_proxy_integration" {
@@ -261,6 +286,44 @@ resource "aws_api_gateway_integration" "upload_avatar_integration" {
   integration_http_method = "POST"
 }
 
+
+
+resource "aws_api_gateway_integration" "s3_proxy_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.gateway.id
+  resource_id             = aws_api_gateway_resource.s3_proxy.id
+  http_method             = aws_api_gateway_method.s3_proxy_method.http_method
+  integration_http_method = "GET"
+  type                    = "AWS"
+  uri                     = "arn:aws:apigateway:us-east-1:s3:path/user-avatar-bucket-dev/{proxy}/placeholder.png"
+  connection_type         = "INTERNET"
+  credentials             = "arn:aws:iam::362643364860:role/LabRole"
+
+  request_parameters = {
+    "integration.request.path.proxy" = "method.request.path.proxy"
+  }
+
+  passthrough_behavior = "WHEN_NO_MATCH"
+  timeout_milliseconds = 29000
+}
+resource "aws_api_gateway_method_response" "s3_proxy_response_200" {
+  rest_api_id = aws_api_gateway_rest_api.gateway.id
+  resource_id = aws_api_gateway_resource.s3_proxy.id
+  http_method = aws_api_gateway_method.s3_proxy_method.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Content-Type" = true
+  }
+}
+resource "aws_api_gateway_integration_response" "s3_proxy_response" {
+  rest_api_id = aws_api_gateway_rest_api.gateway.id
+  resource_id = aws_api_gateway_resource.s3_proxy.id
+  http_method = aws_api_gateway_method.s3_proxy_method.http_method
+  status_code = aws_api_gateway_method_response.s3_proxy_response_200.status_code
+  response_parameters = {
+    "method.response.header.Content-Type" = "integration.response.header.Content-Type"
+  }
+}
 resource "aws_lambda_permission" "upload_avatar_lambda_permission" {
   statement_id  = "AllowUploadAvatarFromAPIGateway"
   action        = "lambda:InvokeFunction"
