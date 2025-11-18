@@ -10,3 +10,6 @@ static/
 !.elasticbeanstalk/*.global.yml
 .venv
 .terraform
+.idea
+aws_service/.idea
+aws_service/.venv
