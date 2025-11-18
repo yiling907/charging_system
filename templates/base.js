@@ -2,6 +2,8 @@ let backendbaseurl = "https://v1wap266rf.execute-api.us-east-1.amazonaws.com/dev
 let apigatewaybaseurl = "https://v1wap266rf.execute-api.us-east-1.amazonaws.com/dev/html/";
 let thirdpartapibaseurl = "https://u1fpdf62ng.execute-api.us-east-1.amazonaws.com/Dev/"
 let awsapibaseurl = "https://v1wap266rf.execute-api.us-east-1.amazonaws.com/dev/service_management"
+let gatwaybaseurl = "https://v1wap266rf.execute-api.us-east-1.amazonaws.com/dev/"
+
 
 function getQueryVariable(variable) {
     var query = window.location.search.substring(1);

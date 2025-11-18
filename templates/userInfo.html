@@ -170,15 +170,30 @@
             alert('Please log in first!');
             window.location.href = "login.html";
         }
+
+        try {
+            const imageres = await axios.get(gatwaybaseurl + 's3/' + localStorage.getItem('userId') + '/placeholder.png',
+                {
+                    headers: {
+                    'Accept': 'image/jpeg'
+                },
+                })
+            console.log(imageres)
+
+            document.querySelector('#avatarPreview img').src = "data:image/jpeg;base64,"+imageres.data;
+        } catch (error) {
+            console.error('error load image', error);
+            document.querySelector('#avatarPreview img').src = 'https://picsum.photos/id/64/200/200';
+        }
     };
 
     document.getElementById('avatarUpload').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        const allowedTypes = ['image/png'];
         if (!allowedTypes.includes(file.type)) {
-            alert('Please upload JPG or PNG format images!');
+            alert('Please upload PNG format images!');
             return;
         }
 
