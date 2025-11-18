@@ -41,15 +41,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
 
-    # 第三方应用
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
     'drf_yasg',
 
-    # 自定义应用
     'charging',
-    'dashboard',
 ]
 
 MIDDLEWARE = [
@@ -90,7 +87,7 @@ CORS_ALLOW_HEADERS = (
 
 # settings.py
 SWAGGER_SETTINGS = {
-    'schemes': ['https'],  # 只保留 HTTPS 协议
+    'schemes': ['https'],
 }
 
 ROOT_URLCONF = 'charging_system.urls'
@@ -141,7 +138,7 @@ REST_FRAMEWORK = {
 }
 
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'Asia/Shanghai'
+TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
