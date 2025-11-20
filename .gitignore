@@ -2,7 +2,6 @@ env
 __pycache__/
 log/
 .DS_Store
-aws_service_for_third_part/
 static/
 # Elastic Beanstalk Files
 .elasticbeanstalk/*

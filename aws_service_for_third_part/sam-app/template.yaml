@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Timeout: 3
+    Tracing: Active
+    LoggingConfig:
+      LogFormat: JSON
+  Api:
+    TracingEnabled: true
+Resources:
+  ThirdPartApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: ThirdPartApi
+      StageName: Dev
+  GetGoogleMapApiKeyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/get_google_api_key/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Role: arn:aws:iam::362643364860:role/LabRole
+      Events:
+        GetGoogleMapApiKey:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ThirdPartApi  
+            Path: /api/google_map/apikey      
+            Method: get              
+
+  GooglePayFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/google_pay/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Role: arn:aws:iam::362643364860:role/LabRole
+      Events:
+        GooglePay:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ThirdPartApi  
+            Path: /api/google_pay/
+            Method: post
+
+
+Outputs:
+  ThirdPartApiUrl:
+    Description: "API Gateway root"
+    Value: !Sub "https://${ThirdPartApi}.execute-api.${AWS::Region}.amazonaws.com/dev/"
