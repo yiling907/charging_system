@@ -41,5 +41,6 @@ jobs:
           AWS_REGION: "us-east-1"
         run: |
           cd backend
-          eb init --platform python-3.9 --region $AWS_REGION --quiet --no-include-gitignore backend
-          eb deploy --verbose
+          eb init -r us-east-1 -p python-3.9 charging-sys
+          eb create dev --service-role LabRole --instance_profile LabInstanceProfile
+          eb deploy
