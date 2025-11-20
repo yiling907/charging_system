@@ -43,4 +43,4 @@ jobs:
       - name: deploy
         run: |
           cd backend
-          eb deploy
+          eb deploy charging-sys-dev
