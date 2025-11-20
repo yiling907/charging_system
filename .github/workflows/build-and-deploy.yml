@@ -40,7 +40,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: "us-east-1"
-      - name: deploy
+      - name: deploy backend
         run: |
           cd backend
           eb deploy charging-sys-dev
+      - name: upload template
+        run: |
+          aws s3 rm s3://charging-system/ --recursiveaws s3 rm s3://charging-system/ --recursive
+          aws s3 cp --recursive templates s3://charging-system/templates
