@@ -43,6 +43,4 @@ jobs:
       - name: deploy
         run: |
           cd backend
-          eb init -r us-east-1 -p python-3.9 charging-sys
-          eb create charging-sys-dev --service-role LabRole --instance_profile LabInstanceProfile
           eb deploy
