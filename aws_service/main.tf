@@ -39,7 +39,7 @@ resource "aws_lambda_function" "create_order_function" {
   source_code_hash = filebase64sha256("create_order.zip")
   handler          = "create_order.handler"
   runtime          = "python3.9"
-  role             = "arn:aws:iam::362643364860:role/LabRole"
+  role             = "arn:aws:iam::218278578731:role/LabRole"
 
   environment {
     variables = {
@@ -47,7 +47,7 @@ resource "aws_lambda_function" "create_order_function" {
       UPDATE_PAYMENT_STATUS_API       = "http://chargingdev.eba-bmzp7bju.us-east-1.elasticbeanstalk.com/api/charging/records/",
       UPDATE_CHARGER_STATUS_API       = "http://chargingdev.eba-bmzp7bju.us-east-1.elasticbeanstalk.com/api/charging/chargers/",
       SCHEDULED_UPDATE_LAMBDA_ARN     = aws_lambda_function.scheduled_status_update_function.arn,
-      AWS_ACCOUNT_ID                  = "362643364860"
+      AWS_ACCOUNT_ID                  = "218278578731"
     }
   }
   layers = [
@@ -63,12 +63,12 @@ resource "aws_lambda_function" "scheduled_status_update_function" {
   source_code_hash = filebase64sha256("scheduled_update.zip")
   handler          = "scheduled_update.handler"
   runtime          = "python3.9"
-  role             = "arn:aws:iam::362643364860:role/LabRole"
+  role             = "arn:aws:iam::218278578731:role/LabRole"
 
   environment {
     variables = {
       UPDATE_CHARGER_STATUS_API = "http://chargingdev.eba-bmzp7bju.us-east-1.elasticbeanstalk.com/api/charging/chargers/",
-      AWS_ACCOUNT_ID            = "362643364860",
+      AWS_ACCOUNT_ID            = "218278578731",
     }
   }
   layers = [
@@ -82,7 +82,7 @@ resource "aws_lambda_function" "upload_avatar_function" {
   source_code_hash = filebase64sha256("upload_avatar.zip")
   handler          = "upload_avatar.handler"
   runtime          = "python3.9"
-  role             = "arn:aws:iam::362643364860:role/LabRole"
+  role             = "arn:aws:iam::218278578731:role/LabRole"
 
   environment {
     variables = {
@@ -94,6 +94,24 @@ resource "aws_lambda_function" "upload_avatar_function" {
   ]
 }
 
+resource "aws_db_instance" "postgres" {
+  allocated_storage      = 20
+  storage_type           = "gp2"
+  engine                 = "postgres"
+  engine_version         = "16.11"
+  instance_class         = var.db_instance_class 
+  db_name                = var.db_name
+  username               = var.db_username
+  password               = var.db_password
+
+  publicly_accessible = false 
+  skip_final_snapshot = true 
+  backup_retention_period = 0 
+
+  tags = {
+    Name = "charging-system-postgres-db"
+  }
+}
 
 resource "aws_api_gateway_rest_api" "gateway" {
   name                         = "IntegrationAPI"
@@ -109,33 +127,28 @@ resource "aws_api_gateway_rest_api" "gateway" {
   ]
 }
 
-resource "aws_api_gateway_resource" "root" {
-  rest_api_id = aws_api_gateway_rest_api.gateway.id
-  parent_id   = ""
-  path_part   = ""
-}
 
 resource "aws_api_gateway_resource" "backend" {
   rest_api_id = aws_api_gateway_rest_api.gateway.id
-  parent_id   = aws_api_gateway_resource.root.id
+  parent_id   = aws_api_gateway_rest_api.gateway.root_resource_id
   path_part   = "backend"
 }
 
 resource "aws_api_gateway_resource" "service_management" {
   rest_api_id = aws_api_gateway_rest_api.gateway.id
-  parent_id   = aws_api_gateway_resource.root.id
+  parent_id   = aws_api_gateway_rest_api.gateway.root_resource_id
   path_part   = "service_management"
 }
 
 resource "aws_api_gateway_resource" "html" {
   rest_api_id = aws_api_gateway_rest_api.gateway.id
-  parent_id   = aws_api_gateway_resource.root.id
+  parent_id   = aws_api_gateway_rest_api.gateway.root_resource_id
   path_part   = "html"
 }
 
 resource "aws_api_gateway_resource" "s3" {
   rest_api_id = aws_api_gateway_rest_api.gateway.id
-  parent_id   = aws_api_gateway_resource.root.id
+  parent_id   = aws_api_gateway_rest_api.gateway.root_resource_id
   path_part   = "s3"
 }
 
@@ -185,7 +198,7 @@ resource "aws_api_gateway_integration" "s3_integration" {
   type                    = "AWS"
   uri                     = "arn:aws:apigateway:us-east-1:s3:path/user-avatar-bucket-dev/{user_id}/{image_name}"
   connection_type         = "INTERNET"
-  credentials             = "arn:aws:iam::362643364860:role/LabRole"
+  credentials             = "arn:aws:iam::218278578731:role/LabRole"
 
   request_parameters = {
     "integration.request.path.user_id"    = "method.request.path.user_id"
@@ -205,7 +218,7 @@ resource "aws_api_gateway_integration_response" "s3_response" {
   content_handling = "CONVERT_TO_TEXT"
 
   response_templates = {
-    "application/json" = "$input.body" # 直接返回 Base64 编码后的字符串
+    "application/json" = "$input.body" 
   }
   depends_on = [aws_api_gateway_integration.s3_integration]
 
@@ -290,7 +303,7 @@ resource "aws_api_gateway_integration" "html_proxy_integration" {
   type                    = "AWS"
   uri                     = "arn:aws:apigateway:us-east-1:s3:path/charging-system/templates/{proxy}"
   connection_type         = "INTERNET"
-  credentials             = "arn:aws:iam::362643364860:role/LabRole"
+  credentials             = "arn:aws:iam::218278578731:role/LabRole"
 
   request_parameters = {
     "integration.request.path.proxy" = "method.request.path.proxy"
@@ -354,34 +367,35 @@ resource "aws_lambda_permission" "upload_avatar_lambda_permission" {
   source_arn = "${aws_api_gateway_rest_api.gateway.execution_arn}/*"
 }
 
-resource "aws_api_gateway_deployment" "dev" {
-  rest_api_id = aws_api_gateway_rest_api.gateway.id
 
-  triggers = {
-    redeployment = sha1(jsonencode(aws_api_gateway_rest_api.gateway.body))
-  }
 
-  lifecycle {
-    create_before_destroy = true
-  }
+variable "db_instance_class" {
+  description = "RDS instance type"
+  type        = string
+  default     = "db.t3.micro"
 }
 
-resource "aws_api_gateway_stage" "dev" {
-  deployment_id = aws_api_gateway_deployment.dev.id
-  rest_api_id   = aws_api_gateway_rest_api.gateway.id
-  stage_name    = "dev"
+variable "db_name" {
+  description = "Database name"
+  type        = string
+  default     = "mydb"
 }
 
+variable "db_username" {
+  description = "Database master username"
+  type        = string
+  default     = "myuser"
+}
 
-output "api_dev_invoke_url" {
-  value = aws_api_gateway_stage.dev.invoke_url
+variable "db_password" {
+  description = "Database master password"
+  type        = string
+  sensitive   = true
+  default = "password"
 }
 
 output "api_arn" {
   value = aws_api_gateway_rest_api.gateway.arn
 }
 
-output "dev_stage_arn" {
-  value = aws_api_gateway_stage.dev.arn
-}
 
