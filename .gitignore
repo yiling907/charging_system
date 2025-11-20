@@ -4,9 +4,9 @@ log/
 .DS_Store
 static/
 # Elastic Beanstalk Files
-.elasticbeanstalk/*
-!.elasticbeanstalk/*.cfg.yml
-!.elasticbeanstalk/*.global.yml
+backend/.elasticbeanstalk/*
+!backend/.elasticbeanstalk/*.cfg.yml
+!backend/.elasticbeanstalk/*.global.yml
 .venv
 .terraform
 .idea
@@ -14,3 +14,4 @@ aws_service/.idea
 aws_service/.venv
 aws_service/.lambda_layers
 deploy.sh
+/backend/.elasticbeanstalk/app_versions/
