@@ -1,11 +1,11 @@
 branch-defaults:
   main:
-    environment: chargingdev
+    environment: charging-sys-dev
 global:
-  application_name: charging_system
+  application_name: charging-sys
   branch: null
   default_ec2_keyname: aws-eb
-  default_platform: Python 3.9 running on 64bit Amazon Linux 2023
+  default_platform: Python 3.9
   default_region: us-east-1
   include_git_submodules: true
   instance_profile: null
