@@ -46,5 +46,5 @@ jobs:
           eb deploy charging-sys-dev
       - name: upload template
         run: |
-          aws s3 rm s3://charging-system/ --recursiveaws s3 rm s3://charging-system/ --recursive
+          aws s3 rm s3://charging-system/ --recursive
           aws s3 cp --recursive templates s3://charging-system/templates
