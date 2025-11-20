@@ -13,3 +13,4 @@ static/
 aws_service/.idea
 aws_service/.venv
 aws_service/.lambda_layers
+deploy.sh
