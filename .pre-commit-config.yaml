@@ -1,3 +1,4 @@
+files: ^.*\.py$
 exclude: ^(aws_service_for_third_part/sam-app/.aws-sam/|aws_service/.lambda_layers/).*\.py$
 default_language_version:
   python: python3.9
