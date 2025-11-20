@@ -12,3 +12,4 @@ static/
 .idea
 aws_service/.idea
 aws_service/.venv
+aws_service/.lambda_layers
