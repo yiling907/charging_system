@@ -113,6 +113,34 @@ resource "aws_db_instance" "postgres" {
   }
 }
 
+locals {
+  database_url = "postgres://${aws_db_instance.postgres.username}:${aws_db_instance.postgres.password}@${aws_db_instance.postgres.endpoint}:${aws_db_instance.postgres.port}/${aws_db_instance.postgres.db_name}?sslmode=require"
+}
+
+
+
+resource "aws_elastic_beanstalk_application" "charging-sys" {
+    description = "Application created from the EB CLI using \"eb init\""
+    name        = "charging-sys"
+}
+
+resource "aws_elastic_beanstalk_environment" "charging-sys-dev" {
+  name                = "charging-sys-dev"
+  application         = aws_elastic_beanstalk_application.charging-sys.name
+  solution_stack_name = "64bit Amazon Linux 2023 v4.8.0 running Python 3.9"
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "DATABASE_URL"
+    value     = local.database_url
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "ENVIRONMENT"
+    value     = "dev"
+  }
+
+}
 resource "aws_api_gateway_rest_api" "gateway" {
   name                         = "IntegrationAPI"
   api_key_source               = "HEADER"
