@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-import dj_database_url
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -111,11 +110,29 @@ TEMPLATES = [
 WSGI_APPLICATION = "charging_system.wsgi.application"
 
 
-DATABASE_URL = os.environ.get(
-    "DATABASE_URL", "postgres://postgres:postgres@localhost:5432/mydevdb"
-)
+if "RDS_DB_NAME" in os.environ:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "NAME": os.environ["RDS_DB_NAME"],
+            "USER": os.environ["RDS_USERNAME"],
+            "PASSWORD": os.environ["RDS_PASSWORD"],
+            "HOST": os.environ["RDS_HOSTNAME"],
+            "PORT": os.environ["RDS_PORT"],
+        }
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "NAME": "patentapp-local",
+            "USER": "postgres",
+            "PASSWORD": "complexpassword123",
+            "HOST": "localhost",
+            "PORT": "5432",
+        }
+    }
 
-DATABASES = {"default": dj_database_url.config(default=os.environ["DATABASE_URL"])}
 AUTH_USER_MODEL = "charging.User"
 
 AUTH_PASSWORD_VALIDATORS = [
