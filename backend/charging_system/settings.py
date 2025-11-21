@@ -117,7 +117,8 @@ DATABASE_URL = os.environ.get(
 
 DATABASES = {
     "default": dj_database_url.config(
-        default=os.environ.get("DATABASE_URL"), engine="django.db.backends.postgresql"
+        default=os.environ.get("DATABASE_URL"),
+        engine="django.db.backends.postgresql_psycopg2",
     )
 }
 AUTH_USER_MODEL = "charging.User"
