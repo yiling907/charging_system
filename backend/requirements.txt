@@ -1,5 +1,5 @@
 dj-config-url
-psycopg2==2.9.9
+psycopg2-binary==2.9.9
 argh==0.31.3
 asgiref==3.10.0
 aws_lambda_powertools==3.22.1
