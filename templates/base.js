@@ -1,8 +1,8 @@
-let backendbaseurl = "https://v1wap266rf.execute-api.us-east-1.amazonaws.com/dev/backend";
-let apigatewaybaseurl = "https://v1wap266rf.execute-api.us-east-1.amazonaws.com/dev/html/";
+let backendbaseurl = "https://t0oy2j75f0.execute-api.us-east-1.amazonaws.com/dev/backend";
+let apigatewaybaseurl = "https://t0oy2j75f0.execute-api.us-east-1.amazonaws.com/dev/html/";
 let thirdpartapibaseurl = "https://u1fpdf62ng.execute-api.us-east-1.amazonaws.com/Dev/"
-let awsapibaseurl = "https://v1wap266rf.execute-api.us-east-1.amazonaws.com/dev/service_management"
-let gatwaybaseurl = "https://v1wap266rf.execute-api.us-east-1.amazonaws.com/dev/"
+let awsapibaseurl = "https://t0oy2j75f0.execute-api.us-east-1.amazonaws.com/dev/service_management"
+let gatwaybaseurl = "https://t0oy2j75f0.execute-api.us-east-1.amazonaws.com/dev/"
 
 
 function getQueryVariable(variable) {
