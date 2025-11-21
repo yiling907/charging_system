@@ -44,8 +44,8 @@ resource "aws_lambda_function" "create_order_function" {
   environment {
     variables = {
       CHARGER_STATUS_CHANGE_QUEUE_URL = aws_sqs_queue.order_status_queue.url
-      UPDATE_PAYMENT_STATUS_API       = "http://chargingdev.eba-bmzp7bju.us-east-1.elasticbeanstalk.com/api/charging/records/",
-      UPDATE_CHARGER_STATUS_API       = "http://chargingdev.eba-bmzp7bju.us-east-1.elasticbeanstalk.com/api/charging/chargers/",
+      UPDATE_PAYMENT_STATUS_API       = "http://charging-sys-dev.eba-thmur3sy.us-east-1.elasticbeanstalk.com/api/charging/records/",
+      UPDATE_CHARGER_STATUS_API       = "http://charging-sys-dev.eba-thmur3sy.us-east-1.elasticbeanstalk.com/api/charging/chargers/",
       SCHEDULED_UPDATE_LAMBDA_ARN     = aws_lambda_function.scheduled_status_update_function.arn,
       AWS_ACCOUNT_ID                  = "218278578731"
     }
@@ -67,7 +67,7 @@ resource "aws_lambda_function" "scheduled_status_update_function" {
 
   environment {
     variables = {
-      UPDATE_CHARGER_STATUS_API = "http://chargingdev.eba-bmzp7bju.us-east-1.elasticbeanstalk.com/api/charging/chargers/",
+      UPDATE_CHARGER_STATUS_API = "http://charging-sys-dev.eba-thmur3sy.us-east-1.elasticbeanstalk.com/api/charging/chargers/",
       AWS_ACCOUNT_ID            = "218278578731",
     }
   }
@@ -299,7 +299,7 @@ resource "aws_api_gateway_integration" "backend_proxy_integration" {
   http_method             = aws_api_gateway_method.backend_proxy_method.http_method
   integration_http_method = "ANY"
   type                    = "HTTP_PROXY"
-  uri                     = "http://chargingdev.eba-bmzp7bju.us-east-1.elasticbeanstalk.com/{proxy}/"
+  uri                     = "http://charging-sys-dev.eba-thmur3sy.us-east-1.elasticbeanstalk.com/{proxy}/"
   connection_type         = "INTERNET"
 
   request_parameters = {
