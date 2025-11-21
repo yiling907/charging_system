@@ -1,0 +1,1 @@
+web: . /opt/elasticbeanstalk/deployment/env && gunicorn --bind 127.0.0.1:8000 charging_system.wsgi:application
