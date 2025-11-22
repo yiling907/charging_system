@@ -10,11 +10,17 @@ BUCKET_NAME = os.environ["BUCKET_NAME"]
 
 def handler(event, context):
     try:
-        request_body = json.loads(event["body"])
-        user_id = request_body.get("user_id")
-        image = request_body.get("image")
-        file_name = user_id + "/" + request_body.get("file_name")
-
+        if event["isBase64Encoded"]:
+            try:
+                body = base64.b64decode(event["body"])
+            except Exception:
+                return {
+                    "statusCode": 400,
+                    "body": json.dumps({"error": "Invalid binary data"}),
+                }
+        user_id = json.loads(body).get("user_id")
+        image = json.loads(body).get("image")
+        file_name = user_id + "/" + json.loads(body).get("file_name")
         image_data = base64.b64decode(image)
 
         s3.delete_object(Bucket=BUCKET_NAME, Key=file_name)

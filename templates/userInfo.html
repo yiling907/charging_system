@@ -173,14 +173,14 @@
 
         try {
             const imageres = await axios.get(gatwaybaseurl + 's3/' + localStorage.getItem('userId') + '/placeholder.png',
-                {
-                    headers: {
-                    'Accept': 'image/jpeg'
-                },
-                })
+                    {
+                        headers: {
+                            'Accept': 'image/jpeg'
+                        },
+                    })
             console.log(imageres)
 
-            document.querySelector('#avatarPreview img').src = "data:image/jpeg;base64,"+imageres.data;
+            document.querySelector('#avatarPreview img').src = "data:image/jpeg;base64," + imageres.data;
         } catch (error) {
             console.error('error load image', error);
             document.querySelector('#avatarPreview img').src = 'https://picsum.photos/id/64/200/200';
@@ -220,12 +220,12 @@
 
         try {
             await axios.post(
-                awsapibaseurl + '/user/avatar',
-                {
-                    "user_id": localStorage.getItem('userId'),
-                    "file_name": selectedAvatarFile.name,
-                    'image': document.querySelector('#avatarPreview img').src.split(',')[1]
-                }
+                    awsapibaseurl + '/user/avatar',
+                    {
+                        "user_id": localStorage.getItem('userId'),
+                        "file_name": selectedAvatarFile.name,
+                        'image': document.querySelector('#avatarPreview img').src.split(',')[1]
+                    }
             );
 
             alert('Avatar uploaded successfully!');
