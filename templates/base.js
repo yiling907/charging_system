@@ -1,6 +1,6 @@
 let backendbaseurl = "https://t0oy2j75f0.execute-api.us-east-1.amazonaws.com/dev/backend";
 let apigatewaybaseurl = "https://t0oy2j75f0.execute-api.us-east-1.amazonaws.com/dev/html/";
-let thirdpartapibaseurl = "https://7hzs4fjhzd.execute-api.us-east-1.amazonaws.com/dev/    "
+let thirdpartapibaseurl = "https://7hzs4fjhzd.execute-api.us-east-1.amazonaws.com/Dev/"
 let awsapibaseurl = "https://t0oy2j75f0.execute-api.us-east-1.amazonaws.com/dev/service_management"
 let gatwaybaseurl = "https://t0oy2j75f0.execute-api.us-east-1.amazonaws.com/dev/"
 

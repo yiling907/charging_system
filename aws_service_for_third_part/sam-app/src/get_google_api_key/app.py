@@ -24,6 +24,11 @@ def lambda_handler(event, context):
     return {
         "statusCode": 200,
         "body": json.dumps({"google_maps_api_key": secret}),
+        "headers": {
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Allow-Origin": "https://t0oy2j75f0.execute-api.us-east-1.amazonaws.com",
+            "Access-Control-Allow-Methods": "POST, GET",
+        },
     }
 
 
