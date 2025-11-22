@@ -21,29 +21,14 @@ Resources:
       CodeUri: src/get_google_api_key/
       Handler: app.lambda_handler
       Runtime: python3.9
-      Role: arn:aws:iam::362643364860:role/LabRole
+      Role: arn:aws:iam::218278578731:role/LabRole
       Events:
         GetGoogleMapApiKey:
           Type: Api
           Properties:
             RestApiId: !Ref ThirdPartApi  
             Path: /api/google_map/apikey      
-            Method: get              
-
-  GooglePayFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: src/google_pay/
-      Handler: app.lambda_handler
-      Runtime: python3.9
-      Role: arn:aws:iam::362643364860:role/LabRole
-      Events:
-        GooglePay:
-          Type: Api
-          Properties:
-            RestApiId: !Ref ThirdPartApi  
-            Path: /api/google_pay/
-            Method: post
+            Method: get
 
 
 Outputs:
